@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Spotify — Podcast Highlight</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1DB954;
+    --amber: #F59B00;
+    --bg-dark: #121212;
+    --surface: #282828;
+    --white: #ffffff;
+    --secondary: #B3B3B3;
+    --transcript-yellow: rgba(245,197,24,0.55);
+  }
+
+  body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 390px;
+    height: 844px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 44px;
+    box-shadow: 0 0 0 1px #333, 0 40px 100px rgba(0,0,0,0.9);
+    background: var(--bg-dark);
+  }
+
+  /* SCREENS */
+  .screen {
+    position: absolute;
+    inset: 0;
+    width: 390px;
+    height: 844px;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
+
+  /* ════════ SCREEN 1 — Player ════════ */
+  #s1 { background: linear-gradient(160deg, #0a2e1c 0%, #121212 45%); }
+  #s2 { background: linear-gradient(160deg, #0a2e1c 0%, #121212 40%); }
+  #s4 { background: var(--bg-dark); }
+
+  /* Status bar */
+  .status-bar {
+    height: 47px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px 0;
+    flex-shrink: 0;
+  }
+  .status-time { font-weight: 700; font-size: 15px; color: #fff; }
+  .status-icons { display: flex; align-items: center; gap: 6px; }
+
+  /* Top bar */
+  .top-bar {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+  .top-bar-dots { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+  .top-bar-title { font-size: 13px; font-weight: 700; color: #fff; text-align: center; flex: 1; }
+  .top-bar-chevron svg { width: 18px; height: 18px; display: block; }
+
+  /* Hint */
+  .hint-text {
+    text-align: center;
+    font-size: 11px;
+    color: #fbea8b;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    padding: 0 24px;
+    letter-spacing: 0.2px;
+  }
+
+  /* Cover wrap — defined below with border logic */
+
+  .cover-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    transition: transform 0.3s ease;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* CSS fallback cover */
+  .cover-fallback {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f8f7f2 0%, #ece8df 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    z-index: 0;
+    transition: transform 0.3s ease;
+  }
+  .cover-orange-bg {
+    position: absolute;
+    top: 20%;
+    left: 12%;
+    right: 12%;
+    bottom: 32%;
+    background: #F97316;
+    border-radius: 8px;
+  }
+  .cover-text {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: #111;
+    line-height: 1.2;
+  }
+  .cover-text em {
+    background: #111;
+    color: #fff;
+    font-style: normal;
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .cover-text small {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    color: #444;
+    margin-top: 3px;
+  }
+
+  /* Cover wrap */
+  .cover-wrap {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto;
+    flex-shrink: 0;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+    border-radius: 13px;
+  }
+
+  /* SVG border path overlay — animated during long-press */
+  .border-svg {
+    position: absolute;
+    inset: -5px;
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    pointer-events: none;
+    z-index: 20;
+    overflow: visible;
+  }
+  .border-path {
+    fill: none;
+    stroke: #fbea8b;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-dasharray: 0 1200;
+    filter: drop-shadow(0 0 5px rgba(251,234,139,0.6));
+  }
+
+  /* Track info */
+  .track-info {
+    padding: 14px 24px 0;
+    flex-shrink: 0;
+  }
+  .track-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .track-title .title-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .add-btn { color: rgba(255,255,255,0.7); flex-shrink: 0; padding-top: 2px; }
+  .track-sub { font-size: 14px; color: #dedede; }
+
+  /* Progress bar */
+  .progress-section { padding: 16px 24px 0; flex-shrink: 0; }
+  .seek-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    position: relative;
+  }
+  .seek-fill {
+    height: 100%;
+    width: 38%;
+    background: #fff;
+    border-radius: 2px;
+    position: relative;
+  }
+  .seek-fill::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+  }
+  /* Highlight marker on timeline */
+  .highlight-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 12px;
+    background: #fbea8b;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: 0 0 5px rgba(251,234,139,0.9);
+  }
+  .seek-times {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px 0;
+    flex-shrink: 0;
+  }
+  .ctrl-btn {
+    color: rgba(255,255,255,0.8);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    transition: background 0.15s;
+  }
+  .ctrl-btn:active { background: rgba(255,255,255,0.1); }
+  .ctrl-speed { display: flex; align-items: center; justify-content: center; min-width: 36px; }
+  .play-btn-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    transition: transform 0.15s;
+    flex-shrink: 0;
+  }
+  .play-btn-large:active { transform: scale(0.95); }
+
+  /* Bottom icons row */
+  .bottom-icons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px 0;
+    flex-shrink: 0;
+  }
+  .bottom-icons-right { display: flex; gap: 18px; }
+
+  .home-indicator {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+    flex-shrink: 0;
+  }
+  .home-indicator-bar {
+    width: 134px;
+    height: 5px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+  }
+
+  /* ════════ SCREEN 2 — Highlighting ════════ */
+  .cover-wrap-small {
+    position: relative;
+    width: 222px;
+    height: 222px;
+    margin: 0 auto;
+    flex-shrink: 0;
+  }
+  .cover-img-small {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+    opacity: 0.85;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    display: block;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .cover-fallback-small {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f8f7f2 0%, #ece8df 100%);
+    opacity: 0.85;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 14px;
+    overflow: hidden;
+  }
+  .cover-fallback-small .cover-orange-bg { top: 18%; left: 12%; right: 12%; bottom: 30%; }
+  .cover-fallback-small .cover-text { font-size: 12px; }
+
+  .highlighting-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0 6px;
+    flex-shrink: 0;
+  }
+  .highlighting-dot {
+    width: 7px;
+    height: 7px;
+    background: #fbea8b;
+    border-radius: 50%;
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.75); }
+  }
+  .highlighting-label { font-size: 12px; font-weight: 700; color: #fbea8b; letter-spacing: 1px; }
+  .countdown { font-size: 12px; font-weight: 600; color: #fbea8b; min-width: 28px; }
+  .stop-btn {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fbea8b;
+    border: 1.5px solid #fbea8b;
+    border-radius: 12px;
+    padding: 3px 10px;
+    background: none;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .stop-btn:active { background: rgba(245,197,24,0.15); }
+
+  /* Transcript card */
+  .transcript-card {
+    margin: 0 14px;
+    background: #292929;
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    flex-shrink: 0;
+  }
+  .transcript-label { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  .transcript-body { font-size: 14px; line-height: 1.55; color: #fff; }
+  .transcript-highlight {
+    background: linear-gradient(to right, rgba(245,197,24,0.65) 0%, rgba(245,197,24,0.65) 100%);
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    background-position: left center;
+    border-radius: 3px;
+    padding: 1px 2px;
+    transition: none;
+  }
+  .transcript-highlight.sweep {
+    animation: marker-sweep 3.6s ease-out 0.3s forwards;
+  }
+  @keyframes marker-sweep {
+    0%   { background-size: 0%   100%; }
+    100% { background-size: 100% 100%; }
+  }
+  .transcript-link {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+    text-decoration: none;
+  }
+
+  /* ════════ SCREEN 4 — My Highlights ════════ */
+  .highlights-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 4px;
+    flex-shrink: 0;
+    background: var(--bg-dark);
+  }
+  .back-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: background 0.15s;
+  }
+  .back-btn:active { background: rgba(255,255,255,0.1); }
+  .highlights-title { flex: 1; font-size: 20px; font-weight: 700; color: #fff; text-align: center; }
+  .filter-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    padding-right: 2px;
+  }
+  .filter-line { height: 2px; background: #fff; border-radius: 1px; width: 18px; }
+  .filter-line:nth-child(2) { width: 12px; }
+
+  .highlights-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .highlights-scroll::-webkit-scrollbar { display: none; }
+
+  .section-header { padding: 14px 16px 4px; }
+  .section-header-title { font-size: 13px; font-weight: 700; color: #fff; }
+  .section-header-date { font-size: 11px; color: var(--secondary); margin-top: 2px; }
+
+  .highlight-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .highlight-card:active { background: rgba(255,255,255,0.04); }
+
+  .thumb-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    object-fit: cover;
+    display: block;
+  }
+  .thumb-css {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    overflow: hidden;
+    position: relative;
+  }
+  .thumb-pb-css { background: linear-gradient(135deg, #f5f0e8, #e8e0d0); }
+  .thumb-pb-dot {
+    position: absolute;
+    top: 12%;
+    left: 10%;
+    right: 10%;
+    bottom: 30%;
+    background: #F97316;
+    border-radius: 4px;
+  }
+  .thumb-lennys-css { background: #F5C518; }
+  .thumb-tpp-css {
+    background: #1a3a5c;
+  }
+  .thumb-tpp-ring {
+    width: 36px; height: 36px;
+    border: 3px solid #4a90d9;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; color: #4a90d9; font-family: serif;
+  }
+
+  .card-info { flex: 1; min-width: 0; }
+  .card-episode {
+    font-size: 13px; font-weight: 500; color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.35; margin-bottom: 3px;
+  }
+  .card-quote {
+    font-size: 12px; color: #d2d2d2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.35; margin-bottom: 3px;
+  }
+  .card-meta {
+    font-size: 11px; color: var(--secondary);
+    display: flex; gap: 5px; align-items: center;
+  }
+
+  .card-play {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; cursor: pointer; border: none;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .card-play:active { transform: scale(0.9); background: #18a349; }
+
+  .card-divider { height: 1px; background: #282828; margin: 0 16px; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    height: 72px;
+    background: var(--bg-dark);
+    border-top: 1px solid #282828;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding: 10px 0 0;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px; cursor: pointer; min-width: 70px;
+    transition: opacity 0.15s;
+  }
+  .nav-item:active { opacity: 0.7; }
+  .nav-label { font-size: 10px; color: var(--secondary); }
+  .nav-item.active .nav-label { color: #fff; }
+  .nav-home-ind {
+    display: flex; justify-content: center;
+    padding: 5px 0; flex-shrink: 0;
+    background: var(--bg-dark);
+  }
+  .nav-home-bar { width: 134px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 3px; }
+
+  /* ════════ SNACKBAR ════════ */
+  .snackbar {
+    position: absolute;
+    bottom: 96px;
+    left: 12px;
+    right: 12px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transform: translateY(16px);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    gap: 12px;
+  }
+  .snackbar.show { transform: translateY(0); opacity: 1; pointer-events: all; }
+  .snackbar-icon { width: 44px; height: 44px; background: var(--green); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .snackbar-text { font-size: 14px; color: #121212; font-weight: 500; flex: 1; }
+  .snackbar-view { font-size: 14px; font-weight: 700; color: var(--green); background: none; border: none; cursor: pointer; padding: 4px 0; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- ══════════════════════
+       SCREEN 1 — Player
+  ══════════════════════ -->
+  <div class="screen active" id="s1">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="white"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2.5" width="3" height="9.5" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 18" fill="white"><path d="M12 14a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0-5a8 8 0 0 1 5.66 2.34l1.42-1.42A10 10 0 0 0 2.92 9.92l1.42 1.42A8 8 0 0 1 12 9zm0-5C16.41 4 20.41 5.68 23.43 8.43l1.41-1.41A17 17 0 0 0 0 7.02l1.41 1.41A15 15 0 0 1 12 4z"/></svg>
+        <svg width="26" height="13" viewBox="0 0 26 13"><rect x="0.5" y="0.5" width="21" height="12" rx="3.5" stroke="white" stroke-opacity="0.4" fill="none"/><rect x="22.5" y="4" width="2.5" height="5" rx="1.25" fill="white" fill-opacity="0.4"/><rect x="2" y="2" width="17" height="9" rx="2" fill="white"/></svg>
+      </div>
+    </div>
+
+    <div class="top-bar">
+      <span class="top-bar-dots">···</span>
+      <span class="top-bar-title">Product Builder</span>
+      <span class="top-bar-chevron">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </div>
+
+    <div class="hint-text">Long-press cover to HIGHLIGHT a moment</div>
+
+    <!-- Cover with SVG border path drawn clockwise from 12 o'clock -->
+    <div class="cover-wrap" id="coverWrap"
+         onmousedown="startLongPress(event)" onmouseup="cancelLongPress()" onmouseleave="cancelLongPress()"
+         ontouchstart="startLongPress(event)" ontouchend="cancelLongPress()" ontouchcancel="cancelLongPress()">
+      <!--
+        SVG viewBox is 290×290 (280+5px padding each side).
+        Path starts at top-center (145,0) and draws clockwise.
+        Corner radius = 13px to match CSS border-radius.
+        Perimeter ≈ 1103px.
+      -->
+      <svg class="border-svg" viewBox="0 0 290 290" id="borderSvg">
+        <path class="border-path" id="borderPath"
+          d="M 145 5
+             L 277 5  Q 285 5 285 13
+             L 285 277 Q 285 285 277 285
+             L 13 285  Q 5 285 5 277
+             L 5 13    Q 5 5 13 5
+             L 145 5"/>
+      </svg>
+      <img class="cover-img" id="coverImg"
+        src="/cover-eyal-david.jpg"
+        alt="Product Builder"
+        onerror="this.style.display='none'">
+      <div class="cover-fallback" id="coverFb">
+        <div class="cover-orange-bg"></div>
+        <div class="cover-text">Product <em>Builder</em><small>WITH EYAL DAVID</small></div>
+      </div>
+    </div>
+
+    <div class="track-info">
+      <div class="track-title">
+        <span class="title-text" id="episodeTitle">What I Discovered While Driving</span>
+        <span class="add-btn">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+        </span>
+      </div>
+      <div class="track-sub">Product Builder with Eyal David</div>
+    </div>
+
+    <div class="progress-section">
+      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-marker" style="left:35.5%;"></div></div>
+      <div class="seek-times"><span>14:22</span><span>-23:41</span></div>
+    </div>
+
+    <div class="controls">
+      <span class="ctrl-speed">
+        <svg width="36" height="36" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.7998 13.65C16.7995 13.4304 16.7304 13.2163 16.6021 13.038C16.4737 12.8597 16.2927 12.7262 16.0845 12.6562C15.8763 12.5861 15.6514 12.5832 15.4414 12.6477C15.2314 12.7122 15.047 12.841 14.914 13.0158C14.756 13.2271 14.602 13.4413 14.452 13.6584C13.759 14.6496 12.9778 15.7689 11.008 16.9491C10.7691 17.0925 10.5969 17.325 10.5294 17.5954C10.4618 17.8657 10.5045 18.1518 10.6479 18.3908C10.7913 18.6297 11.0238 18.8019 11.2941 18.8694C11.5645 18.937 11.8506 18.8943 12.0895 18.7509C13.234 18.0642 14.0656 17.3649 14.6998 16.7097V28.35C14.6998 28.4879 14.727 28.6244 14.7798 28.7518C14.8325 28.8792 14.9099 28.995 15.0074 29.0925C15.1049 29.19 15.2206 29.2673 15.348 29.3201C15.4754 29.3729 15.6119 29.4 15.7498 29.4C15.8877 29.4 16.0243 29.3729 16.1516 29.3201C16.279 29.2673 16.3948 29.19 16.4923 29.0925C16.5898 28.995 16.6671 28.8792 16.7199 28.7518C16.7727 28.6244 16.7998 28.4879 16.7998 28.35V13.65ZM22.7932 21.3066C22.5963 21.1095 22.3292 20.9986 22.0506 20.9984C21.7719 20.9982 21.5046 21.1087 21.3075 21.3056C21.1103 21.5025 20.9994 21.7696 20.9992 22.0482C20.999 22.3269 21.1095 22.5942 21.3064 22.7913L23.7151 25.2L21.3064 27.6066C21.1095 27.8038 20.999 28.0711 20.9992 28.3497C20.9994 28.6283 21.1103 28.8955 21.3075 29.0924C21.5046 29.2893 21.7719 29.3997 22.0506 29.3996C22.3292 29.3994 22.5963 29.2885 22.7932 29.0913L25.1998 26.6847L27.6064 29.0913C27.8033 29.2885 28.0705 29.3994 28.3491 29.3996C28.4871 29.3996 28.6237 29.3726 28.7512 29.3199C28.8787 29.2672 28.9946 29.1899 29.0922 29.0924C29.1898 28.9949 29.2673 28.8791 29.3202 28.7517C29.373 28.6243 29.4003 28.4877 29.4004 28.3497C29.4005 28.2117 29.3734 28.0751 29.3207 27.9476C29.268 27.8201 29.1907 27.7042 29.0932 27.6066L26.6845 25.2L29.0932 22.7913C29.2901 22.5942 29.4006 22.3269 29.4004 22.0482C29.4002 21.7696 29.2893 21.5025 29.0922 21.3056C28.9946 21.2081 28.8787 21.1308 28.7512 21.0781C28.6237 21.0254 28.4871 20.9983 28.3491 20.9984C28.0705 20.9986 27.8033 21.1095 27.6064 21.3066L25.1998 23.7153L22.7932 21.3066Z" fill="rgba(255,255,255,0.85)"/></svg>
+      </span>
+      <button class="ctrl-btn" aria-label="Skip back 15s">
+        <svg width="32" height="32" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19.4009 12.1932C19.6502 12.2197 19.881 12.3375 20.0487 12.524C20.2164 12.7104 20.3092 12.9524 20.3092 13.2031C20.3092 13.4539 20.2164 13.6958 20.0487 13.8823C19.881 14.0687 19.6502 14.1866 19.4009 14.2131L19.2969 14.2188H16.1444L15.9664 15.8104C16.3678 15.8113 16.8277 15.8275 17.2217 15.8836L17.4281 15.9177C18.448 16.1181 19.3523 16.7018 19.9551 17.5486C20.5578 18.3954 20.8131 19.441 20.6684 20.4703C20.5237 21.4996 19.9901 22.4343 19.1773 23.0822C18.3645 23.73 17.3344 24.0418 16.2987 23.9533L16.0916 23.9289C15.5184 23.8485 14.9691 23.6466 14.4803 23.3366C13.9916 23.0267 13.5747 22.6158 13.2576 22.1317L13.1398 21.9408L13.0918 21.8481C12.9903 21.6189 12.977 21.3603 13.0545 21.1219C13.1321 20.8835 13.295 20.6822 13.512 20.5566C13.7289 20.431 13.9847 20.3901 14.23 20.4416C14.4754 20.4931 14.693 20.6335 14.8411 20.8358L14.898 20.9227L14.9573 21.0186C15.1157 21.2607 15.324 21.4662 15.5682 21.6213C15.8124 21.7764 16.087 21.8776 16.3735 21.918L16.5807 21.9359C17.0836 21.9554 17.5758 21.7875 17.9619 21.4648C18.3481 21.1421 18.6007 20.6875 18.6708 20.1891C18.7409 19.6908 18.6235 19.1842 18.3414 18.7674C18.0593 18.3507 17.6325 18.0535 17.1438 17.9335L16.9398 17.8945C16.5872 17.8458 16.0899 17.836 15.6455 17.8441C15.413 17.8482 15.1806 17.8566 14.9484 17.8693L14.9077 17.8726H14.8964C14.7482 17.8825 14.5996 17.8598 14.4611 17.8061C14.3226 17.7523 14.1976 17.6689 14.0948 17.5616C13.9921 17.4543 13.9141 17.3257 13.8665 17.185C13.8188 17.0443 13.8026 16.8949 13.819 16.7473L14.2252 13.091L14.2399 12.9959C14.2875 12.7674 14.4124 12.5623 14.5935 12.415C14.7746 12.2678 15.0009 12.1875 15.2344 12.1875H19.2969L19.4009 12.1932ZM9.0415 12.4759C9.18461 12.3366 9.36564 12.2426 9.56193 12.2056C9.75822 12.1686 9.96105 12.1903 10.1451 12.268C10.3291 12.3457 10.4861 12.4759 10.5965 12.6424C10.7069 12.8089 10.7657 13.0042 10.7656 13.2039V22.3438C10.7656 22.6131 10.6586 22.8714 10.4682 23.0619C10.2777 23.2524 10.0194 23.3594 9.75 23.3594C9.48064 23.3594 9.22231 23.2524 9.03184 23.0619C8.84138 22.8714 8.73438 22.6131 8.73438 22.3438V15.4619C8.31136 15.7621 7.87602 16.0445 7.4295 16.3085C7.19879 16.4428 6.92449 16.4808 6.66594 16.4144C6.40739 16.348 6.18539 16.1825 6.04795 15.9536C5.91052 15.7248 5.86871 15.451 5.93156 15.1916C5.99441 14.9321 6.15688 14.7079 6.38381 14.5673C7.23369 14.0571 7.71063 13.7109 8.05431 13.4209C8.30619 13.208 8.48575 13.0284 8.71244 12.8026C8.80994 12.7051 8.91638 12.5978 9.0415 12.4759ZM13.0146 2.43913C17.8425 2.51144 21.7068 5.09438 24.2141 8.99926C24.3562 9.22591 24.4032 9.49948 24.3447 9.76054C24.2863 10.0216 24.1273 10.2491 23.9021 10.3935C23.6769 10.538 23.4039 10.5878 23.1422 10.5321C22.8806 10.4764 22.6514 10.3198 22.5046 10.0961C20.3003 6.66332 17.0203 4.5305 12.9854 4.46957C9.724 4.42082 6.67387 5.69076 4.70356 8.12582H7.92188C8.19124 8.12582 8.44956 8.23282 8.64003 8.42329C8.8305 8.61375 8.9375 8.87208 8.9375 9.14144C8.9375 9.4108 8.8305 9.66913 8.64003 9.8596C8.44956 10.0501 8.19124 10.1571 7.92188 10.1571H2.64062C2.08 10.1571 1.625 9.70207 1.625 9.14144V3.45475C1.625 3.18539 1.732 2.92707 1.92247 2.7366C2.11294 2.54613 2.37126 2.43913 2.64062 2.43913C2.90999 2.43913 3.16831 2.54613 3.35878 2.7366C3.54925 2.92707 3.65625 3.18539 3.65625 3.45475V6.23513C6.05312 3.66763 9.48269 2.38632 13.0146 2.43913Z" fill="white"/></svg>
+      </button>
+      <button class="play-btn-large" aria-label="Pause">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><rect x="5" y="3" width="4" height="18" rx="1.5"/><rect x="15" y="3" width="4" height="18" rx="1.5"/></svg>
+      </button>
+      <button class="ctrl-btn" aria-label="Skip forward 15s">
+        <svg width="32" height="32" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23.8332 3.52083C23.8332 3.23352 23.719 2.95797 23.5159 2.7548C23.3127 2.55164 23.0372 2.4375 22.7498 2.4375C22.4625 2.4375 22.187 2.55164 21.9838 2.7548C21.7806 2.95797 21.6665 3.23352 21.6665 3.52083V6.47725C20.5095 5.30725 19.0903 4.342 17.383 3.81225C14.763 2.99444 11.9456 3.0695 9.37285 4.02567C6.81185 4.979 4.38518 6.91167 3.11226 9.23325C2.9742 9.48523 2.9419 9.78173 3.02246 10.0575C3.10301 10.3333 3.28982 10.5658 3.5418 10.7039C3.79378 10.8419 4.09028 10.8742 4.36608 10.7937C4.64187 10.7131 4.87437 10.5263 5.01243 10.2743C5.99934 8.47383 7.98076 6.85533 10.1279 6.05692C12.2527 5.26768 14.5795 5.20671 16.7428 5.88358C18.3396 6.37758 19.6656 7.38942 20.7316 8.66667H17.0623C16.775 8.66667 16.4995 8.7808 16.2963 8.98397C16.0932 9.18713 15.979 9.46268 15.979 9.75C15.979 10.0373 16.0932 10.3129 16.2963 10.516C16.4995 10.7192 16.775 10.8333 17.0623 10.8333H22.7498C23.0372 10.8333 23.3127 10.7192 23.5159 10.516C23.719 10.3129 23.8332 10.0373 23.8332 9.75V3.52083ZM10.5623 13C10.5622 12.7783 10.4941 12.562 10.3671 12.3803C10.2402 12.1985 10.0605 12.0601 9.85243 11.9837C9.64433 11.9073 9.41779 11.8965 9.2034 11.9529C8.989 12.0093 8.79707 12.1302 8.65351 12.2991L8.41301 12.5862C7.85509 13.2611 7.24518 13.9978 5.94301 14.7788C5.69664 14.9267 5.51908 15.1663 5.44939 15.445C5.3797 15.7238 5.4236 16.0188 5.57143 16.2652C5.71925 16.5115 5.9589 16.6891 6.23764 16.7588C6.51638 16.8285 6.81139 16.7846 7.05776 16.6368C7.58101 16.3226 8.02085 16.0084 8.39568 15.7008V21.6667C8.39568 21.954 8.50982 22.2295 8.71298 22.4327C8.91614 22.6359 9.19169 22.75 9.47901 22.75C9.76633 22.75 10.0419 22.6359 10.245 22.4327C10.4482 22.2295 10.5623 21.954 10.5623 21.6667V13ZM18.4165 14.0833C18.7038 14.0833 18.9794 13.9692 19.1825 13.766C19.3857 13.5629 19.4998 13.2873 19.4998 13C19.4998 12.7127 19.3857 12.4371 19.1825 12.234C18.9794 12.0308 18.7038 11.9167 18.4165 11.9167H15.0582C14.7959 11.917 14.5426 12.0125 14.3453 12.1854C14.1481 12.3584 14.0203 12.597 13.9857 12.857L13.5523 16.107C13.532 16.2599 13.5445 16.4153 13.5891 16.563C13.6336 16.7106 13.7092 16.8471 13.8107 16.9632C13.9123 17.0793 14.0374 17.1723 14.1778 17.2362C14.3182 17.3 14.4706 17.3331 14.6248 17.3333H16.7915C16.8659 17.3333 16.9417 17.3387 17.019 17.3496C17.2968 17.3888 17.5598 17.4992 17.7822 17.6701C18.0047 17.8411 18.1791 18.0667 18.2885 18.325C18.3979 18.5834 18.4386 18.8656 18.4065 19.1444C18.3744 19.4231 18.2708 19.6887 18.1056 19.9155C17.9404 20.1423 17.7193 20.3224 17.4638 20.4384C17.2083 20.5543 16.9272 20.6022 16.6478 20.5772C16.3683 20.5523 16.1001 20.4555 15.8692 20.2961C15.6383 20.1368 15.4525 19.9203 15.3301 19.6679C15.201 19.4154 14.978 19.2236 14.709 19.1337C14.44 19.0438 14.1465 19.063 13.8915 19.1871C13.6365 19.3112 13.4403 19.5303 13.3451 19.7975C13.2499 20.0646 13.2632 20.3584 13.3823 20.6158C13.6782 21.2248 14.1319 21.7434 14.696 22.1177C15.2602 22.4921 15.9143 22.7085 16.5904 22.7446C17.2665 22.7807 17.9399 22.6351 18.5407 22.3229C19.1415 22.0107 19.6477 21.5434 20.0069 20.9694C20.366 20.3954 20.5648 19.7358 20.5828 19.0589C20.6008 18.3821 20.4372 17.7128 20.109 17.1206C19.7809 16.5284 19.3001 16.0348 18.7167 15.6912C18.1333 15.3476 17.4686 15.1665 16.7915 15.1667H15.8631L16.0072 14.0833H18.4165Z" fill="white"/></svg>
+      </button>
+      <button class="ctrl-btn" aria-label="Repeat">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.5835 0.916687L19.2502 4.58335L15.5835 8.25002" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.75 10.0833V8.24998C2.75 7.27752 3.13631 6.34489 3.82394 5.65725C4.51158 4.96962 5.44421 4.58331 6.41667 4.58331H19.25" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.41667 21.0833L2.75 17.4167L6.41667 13.75" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.25 11.9167V13.75C19.25 14.7225 18.8637 15.6551 18.1761 16.3427C17.4884 17.0304 16.5558 17.4167 15.5833 17.4167H2.75" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="bottom-icons">
+      <div onclick="goToHighlights()" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:0.85;transition:opacity 0.15s;" onmousedown="this.style.opacity='0.5'" onmouseup="this.style.opacity='0.85'" onmouseleave="this.style.opacity='0.85'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.85)"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z"/></svg>
+        <span style="font-size:9px;color:rgba(255,255,255,0.7);font-weight:600;letter-spacing:0.3px;">Highlights</span>
+      </div>
+      <div class="bottom-icons-right">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7zM5 5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5h-2v5H5V7h5V5H5z"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M3 5h16v2H3zm2 4h12v2H5zm0 4h12v2H5zm0 4h12v2H5z"/></svg>
+      </div>
+    </div>
+
+    <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar">
+      <div class="snackbar-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z"/></svg>
+      </div>
+      <span class="snackbar-text">Added to your Highlights.</span>
+      <button class="snackbar-view" onclick="goToHighlights()">View</button>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════
+       SCREEN 2 — Highlighting
+  ══════════════════════ -->
+  <div class="screen" id="s2">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="white"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2.5" width="3" height="9.5" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 18" fill="white"><path d="M12 14a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0-5a8 8 0 0 1 5.66 2.34l1.42-1.42A10 10 0 0 0 2.92 9.92l1.42 1.42A8 8 0 0 1 12 9zm0-5C16.41 4 20.41 5.68 23.43 8.43l1.41-1.41A17 17 0 0 0 0 7.02l1.41 1.41A15 15 0 0 1 12 4z"/></svg>
+        <svg width="26" height="13" viewBox="0 0 26 13"><rect x="0.5" y="0.5" width="21" height="12" rx="3.5" stroke="white" stroke-opacity="0.4" fill="none"/><rect x="22.5" y="4" width="2.5" height="5" rx="1.25" fill="white" fill-opacity="0.4"/><rect x="2" y="2" width="17" height="9" rx="2" fill="white"/></svg>
+      </div>
+    </div>
+    <div class="top-bar">
+      <span class="top-bar-dots">···</span>
+      <span class="top-bar-title">Product Builder</span>
+      <span class="top-bar-chevron">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </div>
+
+    <!-- Shrunk cover -->
+    <div class="cover-wrap-small">
+      <img class="cover-img-small" id="coverImg2"
+        src="/cover-eyal-david.jpg"
+        alt="Cover"
+        onerror="this.style.display='none'">
+      <div class="cover-fallback-small cover-fallback">
+        <div class="cover-orange-bg"></div>
+        <div class="cover-text" style="font-size:12px;">Product <em>Builder</em></div>
+      </div>
+    </div>
+
+    <!-- Highlighting indicator -->
+    <div class="highlighting-row">
+      <div class="highlighting-dot"></div>
+      <span class="highlighting-label">HIGHLIGHTING...</span>
+      <span class="countdown" id="countdown">0:20</span>
+      <button class="stop-btn" onclick="stopHighlight()">Stop</button>
+    </div>
+
+    <!-- Transcript card -->
+    <div class="transcript-card">
+      <div class="transcript-label">Transcript preview</div>
+      <div class="transcript-body">
+        <span class="transcript-highlight">The best product ideas come from your own daily frustrations — not from research docs</span>
+      </div>
+      <a class="transcript-link" href="#" onclick="return false;">Show full transcript</a>
+    </div>
+
+    <div class="track-info" style="padding-top:10px;">
+      <div class="track-title" style="font-size:18px;"><span>What I Discovered While Driving</span></div>
+      <div class="track-sub" style="font-size:13px;">Product Builder with Eyal David</div>
+    </div>
+
+    <div class="progress-section">
+      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-marker" style="left:35.5%;"></div></div>
+      <div class="seek-times"><span>14:22</span><span>-23:41</span></div>
+    </div>
+
+    <div class="controls">
+      <span class="ctrl-speed">
+        <svg width="36" height="36" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.7998 13.65C16.7995 13.4304 16.7304 13.2163 16.6021 13.038C16.4737 12.8597 16.2927 12.7262 16.0845 12.6562C15.8763 12.5861 15.6514 12.5832 15.4414 12.6477C15.2314 12.7122 15.047 12.841 14.914 13.0158C14.756 13.2271 14.602 13.4413 14.452 13.6584C13.759 14.6496 12.9778 15.7689 11.008 16.9491C10.7691 17.0925 10.5969 17.325 10.5294 17.5954C10.4618 17.8657 10.5045 18.1518 10.6479 18.3908C10.7913 18.6297 11.0238 18.8019 11.2941 18.8694C11.5645 18.937 11.8506 18.8943 12.0895 18.7509C13.234 18.0642 14.0656 17.3649 14.6998 16.7097V28.35C14.6998 28.4879 14.727 28.6244 14.7798 28.7518C14.8325 28.8792 14.9099 28.995 15.0074 29.0925C15.1049 29.19 15.2206 29.2673 15.348 29.3201C15.4754 29.3729 15.6119 29.4 15.7498 29.4C15.8877 29.4 16.0243 29.3729 16.1516 29.3201C16.279 29.2673 16.3948 29.19 16.4923 29.0925C16.5898 28.995 16.6671 28.8792 16.7199 28.7518C16.7727 28.6244 16.7998 28.4879 16.7998 28.35V13.65ZM22.7932 21.3066C22.5963 21.1095 22.3292 20.9986 22.0506 20.9984C21.7719 20.9982 21.5046 21.1087 21.3075 21.3056C21.1103 21.5025 20.9994 21.7696 20.9992 22.0482C20.999 22.3269 21.1095 22.5942 21.3064 22.7913L23.7151 25.2L21.3064 27.6066C21.1095 27.8038 20.999 28.0711 20.9992 28.3497C20.9994 28.6283 21.1103 28.8955 21.3075 29.0924C21.5046 29.2893 21.7719 29.3997 22.0506 29.3996C22.3292 29.3994 22.5963 29.2885 22.7932 29.0913L25.1998 26.6847L27.6064 29.0913C27.8033 29.2885 28.0705 29.3994 28.3491 29.3996C28.4871 29.3996 28.6237 29.3726 28.7512 29.3199C28.8787 29.2672 28.9946 29.1899 29.0922 29.0924C29.1898 28.9949 29.2673 28.8791 29.3202 28.7517C29.373 28.6243 29.4003 28.4877 29.4004 28.3497C29.4005 28.2117 29.3734 28.0751 29.3207 27.9476C29.268 27.8201 29.1907 27.7042 29.0932 27.6066L26.6845 25.2L29.0932 22.7913C29.2901 22.5942 29.4006 22.3269 29.4004 22.0482C29.4002 21.7696 29.2893 21.5025 29.0922 21.3056C28.9946 21.2081 28.8787 21.1308 28.7512 21.0781C28.6237 21.0254 28.4871 20.9983 28.3491 20.9984C28.0705 20.9986 27.8033 21.1095 27.6064 21.3066L25.1998 23.7153L22.7932 21.3066Z" fill="rgba(255,255,255,0.85)"/></svg>
+      </span>
+      <button class="ctrl-btn">
+        <svg width="32" height="32" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19.4009 12.1932C19.6502 12.2197 19.881 12.3375 20.0487 12.524C20.2164 12.7104 20.3092 12.9524 20.3092 13.2031C20.3092 13.4539 20.2164 13.6958 20.0487 13.8823C19.881 14.0687 19.6502 14.1866 19.4009 14.2131L19.2969 14.2188H16.1444L15.9664 15.8104C16.3678 15.8113 16.8277 15.8275 17.2217 15.8836L17.4281 15.9177C18.448 16.1181 19.3523 16.7018 19.9551 17.5486C20.5578 18.3954 20.8131 19.441 20.6684 20.4703C20.5237 21.4996 19.9901 22.4343 19.1773 23.0822C18.3645 23.73 17.3344 24.0418 16.2987 23.9533L16.0916 23.9289C15.5184 23.8485 14.9691 23.6466 14.4803 23.3366C13.9916 23.0267 13.5747 22.6158 13.2576 22.1317L13.1398 21.9408L13.0918 21.8481C12.9903 21.6189 12.977 21.3603 13.0545 21.1219C13.1321 20.8835 13.295 20.6822 13.512 20.5566C13.7289 20.431 13.9847 20.3901 14.23 20.4416C14.4754 20.4931 14.693 20.6335 14.8411 20.8358L14.898 20.9227L14.9573 21.0186C15.1157 21.2607 15.324 21.4662 15.5682 21.6213C15.8124 21.7764 16.087 21.8776 16.3735 21.918L16.5807 21.9359C17.0836 21.9554 17.5758 21.7875 17.9619 21.4648C18.3481 21.1421 18.6007 20.6875 18.6708 20.1891C18.7409 19.6908 18.6235 19.1842 18.3414 18.7674C18.0593 18.3507 17.6325 18.0535 17.1438 17.9335L16.9398 17.8945C16.5872 17.8458 16.0899 17.836 15.6455 17.8441C15.413 17.8482 15.1806 17.8566 14.9484 17.8693L14.9077 17.8726H14.8964C14.7482 17.8825 14.5996 17.8598 14.4611 17.8061C14.3226 17.7523 14.1976 17.6689 14.0948 17.5616C13.9921 17.4543 13.9141 17.3257 13.8665 17.185C13.8188 17.0443 13.8026 16.8949 13.819 16.7473L14.2252 13.091L14.2399 12.9959C14.2875 12.7674 14.4124 12.5623 14.5935 12.415C14.7746 12.2678 15.0009 12.1875 15.2344 12.1875H19.2969L19.4009 12.1932ZM9.0415 12.4759C9.18461 12.3366 9.36564 12.2426 9.56193 12.2056C9.75822 12.1686 9.96105 12.1903 10.1451 12.268C10.3291 12.3457 10.4861 12.4759 10.5965 12.6424C10.7069 12.8089 10.7657 13.0042 10.7656 13.2039V22.3438C10.7656 22.6131 10.6586 22.8714 10.4682 23.0619C10.2777 23.2524 10.0194 23.3594 9.75 23.3594C9.48064 23.3594 9.22231 23.2524 9.03184 23.0619C8.84138 22.8714 8.73438 22.6131 8.73438 22.3438V15.4619C8.31136 15.7621 7.87602 16.0445 7.4295 16.3085C7.19879 16.4428 6.92449 16.4808 6.66594 16.4144C6.40739 16.348 6.18539 16.1825 6.04795 15.9536C5.91052 15.7248 5.86871 15.451 5.93156 15.1916C5.99441 14.9321 6.15688 14.7079 6.38381 14.5673C7.23369 14.0571 7.71063 13.7109 8.05431 13.4209C8.30619 13.208 8.48575 13.0284 8.71244 12.8026C8.80994 12.7051 8.91638 12.5978 9.0415 12.4759ZM13.0146 2.43913C17.8425 2.51144 21.7068 5.09438 24.2141 8.99926C24.3562 9.22591 24.4032 9.49948 24.3447 9.76054C24.2863 10.0216 24.1273 10.2491 23.9021 10.3935C23.6769 10.538 23.4039 10.5878 23.1422 10.5321C22.8806 10.4764 22.6514 10.3198 22.5046 10.0961C20.3003 6.66332 17.0203 4.5305 12.9854 4.46957C9.724 4.42082 6.67387 5.69076 4.70356 8.12582H7.92188C8.19124 8.12582 8.44956 8.23282 8.64003 8.42329C8.8305 8.61375 8.9375 8.87208 8.9375 9.14144C8.9375 9.4108 8.8305 9.66913 8.64003 9.8596C8.44956 10.0501 8.19124 10.1571 7.92188 10.1571H2.64062C2.08 10.1571 1.625 9.70207 1.625 9.14144V3.45475C1.625 3.18539 1.732 2.92707 1.92247 2.7366C2.11294 2.54613 2.37126 2.43913 2.64062 2.43913C2.90999 2.43913 3.16831 2.54613 3.35878 2.7366C3.54925 2.92707 3.65625 3.18539 3.65625 3.45475V6.23513C6.05312 3.66763 9.48269 2.38632 13.0146 2.43913Z" fill="white"/></svg>
+      </button>
+      <button class="play-btn-large">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><rect x="5" y="3" width="4" height="18" rx="1.5"/><rect x="15" y="3" width="4" height="18" rx="1.5"/></svg>
+      </button>
+      <button class="ctrl-btn">
+        <svg width="32" height="32" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23.8332 3.52083C23.8332 3.23352 23.719 2.95797 23.5159 2.7548C23.3127 2.55164 23.0372 2.4375 22.7498 2.4375C22.4625 2.4375 22.187 2.55164 21.9838 2.7548C21.7806 2.95797 21.6665 3.23352 21.6665 3.52083V6.47725C20.5095 5.30725 19.0903 4.342 17.383 3.81225C14.763 2.99444 11.9456 3.0695 9.37285 4.02567C6.81185 4.979 4.38518 6.91167 3.11226 9.23325C2.9742 9.48523 2.9419 9.78173 3.02246 10.0575C3.10301 10.3333 3.28982 10.5658 3.5418 10.7039C3.79378 10.8419 4.09028 10.8742 4.36608 10.7937C4.64187 10.7131 4.87437 10.5263 5.01243 10.2743C5.99934 8.47383 7.98076 6.85533 10.1279 6.05692C12.2527 5.26768 14.5795 5.20671 16.7428 5.88358C18.3396 6.37758 19.6656 7.38942 20.7316 8.66667H17.0623C16.775 8.66667 16.4995 8.7808 16.2963 8.98397C16.0932 9.18713 15.979 9.46268 15.979 9.75C15.979 10.0373 16.0932 10.3129 16.2963 10.516C16.4995 10.7192 16.775 10.8333 17.0623 10.8333H22.7498C23.0372 10.8333 23.3127 10.7192 23.5159 10.516C23.719 10.3129 23.8332 10.0373 23.8332 9.75V3.52083ZM10.5623 13C10.5622 12.7783 10.4941 12.562 10.3671 12.3803C10.2402 12.1985 10.0605 12.0601 9.85243 11.9837C9.64433 11.9073 9.41779 11.8965 9.2034 11.9529C8.989 12.0093 8.79707 12.1302 8.65351 12.2991L8.41301 12.5862C7.85509 13.2611 7.24518 13.9978 5.94301 14.7788C5.69664 14.9267 5.51908 15.1663 5.44939 15.445C5.3797 15.7238 5.4236 16.0188 5.57143 16.2652C5.71925 16.5115 5.9589 16.6891 6.23764 16.7588C6.51638 16.8285 6.81139 16.7846 7.05776 16.6368C7.58101 16.3226 8.02085 16.0084 8.39568 15.7008V21.6667C8.39568 21.954 8.50982 22.2295 8.71298 22.4327C8.91614 22.6359 9.19169 22.75 9.47901 22.75C9.76633 22.75 10.0419 22.6359 10.245 22.4327C10.4482 22.2295 10.5623 21.954 10.5623 21.6667V13ZM18.4165 14.0833C18.7038 14.0833 18.9794 13.9692 19.1825 13.766C19.3857 13.5629 19.4998 13.2873 19.4998 13C19.4998 12.7127 19.3857 12.4371 19.1825 12.234C18.9794 12.0308 18.7038 11.9167 18.4165 11.9167H15.0582C14.7959 11.917 14.5426 12.0125 14.3453 12.1854C14.1481 12.3584 14.0203 12.597 13.9857 12.857L13.5523 16.107C13.532 16.2599 13.5445 16.4153 13.5891 16.563C13.6336 16.7106 13.7092 16.8471 13.8107 16.9632C13.9123 17.0793 14.0374 17.1723 14.1778 17.2362C14.3182 17.3 14.4706 17.3331 14.6248 17.3333H16.7915C16.8659 17.3333 16.9417 17.3387 17.019 17.3496C17.2968 17.3888 17.5598 17.4992 17.7822 17.6701C18.0047 17.8411 18.1791 18.0667 18.2885 18.325C18.3979 18.5834 18.4386 18.8656 18.4065 19.1444C18.3744 19.4231 18.2708 19.6887 18.1056 19.9155C17.9404 20.1423 17.7193 20.3224 17.4638 20.4384C17.2083 20.5543 16.9272 20.6022 16.6478 20.5772C16.3683 20.5523 16.1001 20.4555 15.8692 20.2961C15.6383 20.1368 15.4525 19.9203 15.3301 19.6679C15.201 19.4154 14.978 19.2236 14.709 19.1337C14.44 19.0438 14.1465 19.063 13.8915 19.1871C13.6365 19.3112 13.4403 19.5303 13.3451 19.7975C13.2499 20.0646 13.2632 20.3584 13.3823 20.6158C13.6782 21.2248 14.1319 21.7434 14.696 22.1177C15.2602 22.4921 15.9143 22.7085 16.5904 22.7446C17.2665 22.7807 17.9399 22.6351 18.5407 22.3229C19.1415 22.0107 19.6477 21.5434 20.0069 20.9694C20.366 20.3954 20.5648 19.7358 20.5828 19.0589C20.6008 18.3821 20.4372 17.7128 20.109 17.1206C19.7809 16.5284 19.3001 16.0348 18.7167 15.6912C18.1333 15.3476 17.4686 15.1665 16.7915 15.1667H15.8631L16.0072 14.0833H18.4165Z" fill="white"/></svg>
+      </button>
+      <button class="ctrl-btn">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.5835 0.916687L19.2502 4.58335L15.5835 8.25002" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.75 10.0833V8.24998C2.75 7.27752 3.13631 6.34489 3.82394 5.65725C4.51158 4.96962 5.44421 4.58331 6.41667 4.58331H19.25" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.41667 21.0833L2.75 17.4167L6.41667 13.75" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.25 11.9167V13.75C19.25 14.7225 18.8637 15.6551 18.1761 16.3427C17.4884 17.0304 16.5558 17.4167 15.5833 17.4167H2.75" stroke="rgba(255,255,255,0.8)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+  </div>
+
+
+  <!-- ══════════════════════
+       SCREEN 4 — My Highlights
+  ══════════════════════ -->
+  <div class="screen" id="s4">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="white"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2.5" width="3" height="9.5" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 18" fill="white"><path d="M12 14a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0-5a8 8 0 0 1 5.66 2.34l1.42-1.42A10 10 0 0 0 2.92 9.92l1.42 1.42A8 8 0 0 1 12 9zm0-5C16.41 4 20.41 5.68 23.43 8.43l1.41-1.41A17 17 0 0 0 0 7.02l1.41 1.41A15 15 0 0 1 12 4z"/></svg>
+        <svg width="26" height="13" viewBox="0 0 26 13"><rect x="0.5" y="0.5" width="21" height="12" rx="3.5" stroke="white" stroke-opacity="0.4" fill="none"/><rect x="22.5" y="4" width="2.5" height="5" rx="1.25" fill="white" fill-opacity="0.4"/><rect x="2" y="2" width="17" height="9" rx="2" fill="white"/></svg>
+      </div>
+    </div>
+
+    <div class="highlights-header">
+      <div class="back-btn" onclick="goToPlayer()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </div>
+      <div class="highlights-title">My Highlights</div>
+      <div class="filter-btn">
+        <div class="filter-line"></div>
+        <div class="filter-line"></div>
+        <div class="filter-line"></div>
+      </div>
+    </div>
+
+    <div class="highlights-scroll">
+
+      <!-- Group: Today -->
+      <div class="section-header">
+        <div class="section-header-title">Today</div>
+        <div class="section-header-date">Today, Apr 4</div>
+      </div>
+
+      <div class="highlight-card" onclick="goToPlayer('What I Discovered While Driving')">
+        <img class="thumb-img"
+          src="https://www.figma.com/api/mcp/asset/fd810c31-9afb-4d99-99a5-e7d3544746a5"
+          alt="Product Builder"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="thumb-css thumb-pb-css" style="display:none"><div class="thumb-pb-dot"></div></div>
+        <div class="card-info">
+          <div class="card-episode">What I Discovered While Driving</div>
+          <div class="card-quote">"...the best features come from personal frustration..."</div>
+          <div class="card-meta"><span>14:22</span><span>·</span><span>28s</span></div>
+        </div>
+        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('What I Discovered While Driving')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+        </button>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="highlight-card" onclick="goToPlayer('How to Find Product-Market Fit')">
+        <img class="thumb-img"
+          src="https://www.figma.com/api/mcp/asset/69520fa9-fe8b-437b-8af2-49de64217d9a"
+          alt="Lenny's Podcast"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="thumb-css thumb-lennys-css" style="display:none">🎙️</div>
+        <div class="card-info">
+          <div class="card-episode">How to Find Product-Market Fit</div>
+          <div class="card-quote">"...the best PMs fall in love with the problem, not the solution..."</div>
+          <div class="card-meta"><span>22:08</span><span>·</span><span>18s</span></div>
+        </div>
+        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('How to Find Product-Market Fit')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+        </button>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- Group: Last Week -->
+      <div class="section-header">
+        <div class="section-header-title">Last Week</div>
+        <div class="section-header-date">Yesterday, Apr 3</div>
+      </div>
+
+      <div class="highlight-card" onclick="goToPlayer('The PM\'s Role in Discovery')">
+        <img class="thumb-img"
+          src="https://www.figma.com/api/mcp/asset/8b7918f3-09da-4e94-978b-1e1e8c6991a7"
+          alt="The Product Podcast"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="thumb-css thumb-tpp-css" style="display:none"><div class="thumb-tpp-ring">P</div></div>
+        <div class="card-info">
+          <div class="card-episode">The PM's Role in Discovery</div>
+          <div class="card-quote">"...we almost shipped a feature nobody asked for..."</div>
+          <div class="card-meta"><span>1:04:33</span><span>·</span><span>22s</span></div>
+        </div>
+        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('The PM\'s Role in Discovery')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+        </button>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="highlight-card" onclick="goToPlayer('5 Whys Method')">
+        <img class="thumb-img"
+          src="https://www.figma.com/api/mcp/asset/fd810c31-9afb-4d99-99a5-e7d3544746a5"
+          alt="Product Builder"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="thumb-css thumb-pb-css" style="display:none"><div class="thumb-pb-dot"></div></div>
+        <div class="card-info">
+          <div class="card-episode">5 Whys Method</div>
+          <div class="card-quote">"...keep asking why until you hit the root cause..."</div>
+          <div class="card-meta"><span>2:15:47</span><span>·</span><span>31s</span></div>
+        </div>
+        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('5 Whys Method')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+        </button>
+      </div>
+
+      <div class="card-divider"></div>
+      <div style="height:20px"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goToPlayer()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5a6.5 6.5 0 10-6.5 6.5 6.47 6.47 0 004.23-1.57l.27.28v.79l5 5 1.49-1.49-4.99-5.01zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span class="nav-label">Search</span>
+      </div>
+      <div class="nav-item active">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
+        <span class="nav-label">Your Library</span>
+      </div>
+    </div>
+    <div class="nav-home-ind"><div class="nav-home-bar"></div></div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+  // ── State ────────────────────────────────
+  let longPressTimer  = null;
+  let countdownTimer  = null;
+  let ringAnimFrame   = null;
+  let pressStart      = 0;
+  let countdownValue  = 20;
+  const PRESS_MS      = 1500;
+
+  // ── Screens ──────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── Long-press (S1 → S2) ─────────────────
+  // Path perimeter ≈ 1107px
+  const PATH_LEN = 1107;
+
+  function startLongPress(e) {
+    e.preventDefault();
+    pressStart = Date.now();
+
+    const path = document.getElementById('borderPath');
+    const img  = document.getElementById('coverImg');
+    const fb   = document.getElementById('coverFb');
+
+    // Reset to empty
+    path.style.strokeDasharray = `0 ${PATH_LEN}`;
+
+    if (img) img.style.transform = 'scale(0.97)';
+    if (fb)  fb.style.transform  = 'scale(0.97)';
+
+    function tick() {
+      const elapsed  = Date.now() - pressStart;
+      const fraction = Math.min(elapsed / PRESS_MS, 1);
+      const drawn    = fraction * PATH_LEN;
+      path.style.strokeDasharray = `${drawn} ${PATH_LEN}`;
+      if (fraction < 1) {
+        ringAnimFrame = requestAnimationFrame(tick);
+      }
+    }
+    ringAnimFrame = requestAnimationFrame(tick);
+
+    longPressTimer = setTimeout(() => {
+      cancelAnimationFrame(ringAnimFrame);
+      path.style.strokeDasharray = `0 ${PATH_LEN}`;
+      if (img) img.style.transform = '';
+      if (fb)  fb.style.transform  = '';
+      beginHighlighting();
+    }, PRESS_MS);
+  }
+
+  function cancelLongPress() {
+    if (!longPressTimer) return;
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+    cancelAnimationFrame(ringAnimFrame);
+    const path = document.getElementById('borderPath');
+    const img  = document.getElementById('coverImg');
+    const fb   = document.getElementById('coverFb');
+    // Fade out the border quickly
+    path.style.transition = 'stroke-dasharray 0.2s ease';
+    path.style.strokeDasharray = `0 ${PATH_LEN}`;
+    setTimeout(() => { path.style.transition = ''; }, 220);
+    if (img) img.style.transform = '';
+    if (fb)  fb.style.transform  = '';
+  }
+
+  // ── Highlighting (S2) ────────────────────
+  function beginHighlighting() {
+    showScreen('s2');
+    countdownValue = 20;
+    renderCountdown();
+    clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => {
+      countdownValue--;
+      renderCountdown();
+      if (countdownValue <= 0) {
+        clearInterval(countdownTimer);
+        saveHighlight();
+      }
+    }, 1000);
+
+    // Trigger marker sweep on transcript highlight
+    const hl = document.querySelector('.transcript-highlight');
+    hl.classList.remove('sweep');
+    // Force reflow so animation restarts cleanly
+    void hl.offsetWidth;
+    hl.classList.add('sweep');
+  }
+
+  function renderCountdown() {
+    const m = Math.floor(countdownValue / 60);
+    const s = countdownValue % 60;
+    document.getElementById('countdown').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }
+
+  function stopHighlight() {
+    clearInterval(countdownTimer);
+    saveHighlight();
+  }
+
+  // ── Save → snackbar → S1 ─────────────────
+  function saveHighlight() {
+    showScreen('s1');
+    showSnackbar();
+  }
+
+  // ── Snackbar ──────────────────────────────
+  let snackTimer = null;
+  function showSnackbar() {
+    const sb = document.getElementById('snackbar');
+    sb.classList.add('show');
+    clearTimeout(snackTimer);
+    snackTimer = setTimeout(hideSnackbar, 4000);
+  }
+  function hideSnackbar() {
+    document.getElementById('snackbar').classList.remove('show');
+  }
+
+  // ── Navigation ────────────────────────────
+  function goToHighlights() {
+    hideSnackbar();
+    showScreen('s4');
+  }
+  function goToPlayer(title) {
+    if (title) {
+      document.getElementById('episodeTitle').textContent = title;
+    }
+    showScreen('s1');
+  }
+</script>
+</body>
+</html>
