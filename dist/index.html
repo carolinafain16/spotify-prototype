@@ -249,6 +249,7 @@
     background: #fff;
     border-radius: 2px;
     position: relative;
+    z-index: 2; /* keep circle above yellow segment */
   }
   .highlight-segment {
     position: absolute;
@@ -256,11 +257,11 @@
     transform: translateY(-50%);
     left: calc(35.5% - 15px);
     width: 30px;
-    height: 4.8px;
+    height: 7.2px; /* 4.8 × 1.5 */
     background: #fbea8b;
     border-radius: 2px;
     display: none;
-    z-index: 2;
+    z-index: 1; /* below the white circle */
   }
   .has-highlight .highlight-segment { display: block; }
   .seek-fill::after {
