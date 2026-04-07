@@ -81,21 +81,28 @@
   .top-bar-title { font-size: 13px; font-weight: 700; color: #fff; text-align: center; flex: 1; }
   .top-bar-chevron svg { width: 18px; height: 18px; display: block; }
 
-  @keyframes green-pulse {
-    0%, 100% { filter: drop-shadow(0 0 0px rgba(29,185,84,0)); }
-    50%       { filter: drop-shadow(0 0 7px rgba(29,185,84,0.75)); }
+  @keyframes hint-pulse {
+    0%, 100% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 0px rgba(251,234,139,0));
+    }
+    50% {
+      transform: scale(1.04);
+      filter: drop-shadow(0 0 5px rgba(251,234,139,0.55));
+    }
   }
 
   /* Hint */
   .hint-text {
     text-align: center;
-    font-size: 11px;
+    font-size: 13px;
     color: #fbea8b;
     margin-bottom: 8px;
     flex-shrink: 0;
     padding: 0 24px;
     letter-spacing: 0.2px;
-    animation: green-pulse 1.5s ease-in-out infinite;
+    transform-origin: center;
+    animation: hint-pulse 1.5s ease-in-out infinite;
   }
 
   /* Cover wrap — defined below with border logic */
@@ -176,6 +183,11 @@
          user-select: none;
     touch-action: none;
     border-radius: 13px;
+    transition: transform 0.2s ease, filter 0.2s ease;
+  }
+  .cover-wrap:hover {
+    transform: scale(0.97);
+    filter: brightness(0.9);
   }
 
   /* SVG border path overlay — animated during long-press */
@@ -240,6 +252,19 @@
     border-radius: 2px;
     position: relative;
   }
+  .highlight-segment {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: calc(35.5% - 15px);
+    width: 30px;
+    height: 4.8px;
+    background: #fbea8b;
+    border-radius: 2px;
+    display: none;
+    z-index: 2;
+  }
+  .has-highlight .highlight-segment { display: block; }
   .seek-fill::after {
     content: '';
     position: absolute;
@@ -251,12 +276,15 @@
     background: #fff;
     border-radius: 50%;
     box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    display: none;
   }
-  /* Highlight marker on timeline */
+  .has-highlight .seek-fill::after { display: block; }
+  /* Highlight marker on timeline — hidden until first highlight is saved */
   .highlight-marker {
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
+    visibility: hidden;
     width: 3px;
     height: 12px;
     background: #fbea8b;
@@ -264,6 +292,31 @@
     pointer-events: none;
     z-index: 3;
     box-shadow: 0 0 5px rgba(251,234,139,0.9);
+  }
+  .has-highlight .highlight-marker { visibility: visible; }
+  /* Empty state for My Highlights */
+  .highlights-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 32px;
+    flex: 1;
+  }
+  .highlights-empty-icon { opacity: 0.25; }
+  .highlights-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    opacity: 0.5;
+    text-align: center;
+  }
+  .highlights-empty-sub {
+    font-size: 13px;
+    color: var(--secondary);
+    text-align: center;
+    line-height: 1.5;
   }
   .seek-times {
     display: flex;
@@ -709,7 +762,7 @@
     </div>
 
     <div class="progress-section">
-      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-marker" style="left:35.5%;"></div></div>
+      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-segment"></div></div>
       <div class="seek-times"><span>14:22</span><span>-23:41</span></div>
     </div>
 
@@ -821,7 +874,7 @@
     </div>
 
     <div class="progress-section">
-      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-marker" style="left:35.5%;"></div></div>
+      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-segment"></div></div>
       <div class="seek-times"><span>14:22</span><span>-23:41</span></div>
     </div>
 
@@ -888,6 +941,18 @@
     </div>
 
     <div class="highlights-scroll">
+
+      <!-- Empty state — visible until first highlight is created -->
+      <div id="highlightsEmpty" class="highlights-empty">
+        <div class="highlights-empty-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="white"/></svg>
+        </div>
+        <div class="highlights-empty-title">No highlights yet</div>
+        <div class="highlights-empty-sub">Long-press the cover on the player screen to capture a moment</div>
+      </div>
+
+      <!-- Card list — hidden until first highlight is created -->
+      <div id="highlightsList" style="display:none">
 
       <!-- Group: Today -->
       <div class="section-header">
@@ -993,6 +1058,8 @@
 
       <div class="card-divider"></div>
       <div style="height:20px"></div>
+
+      </div><!-- /#highlightsList -->
     </div>
 
     <div class="bottom-nav">
@@ -1017,12 +1084,13 @@
 
 <script>
   // ── State ────────────────────────────────
-  let longPressTimer  = null;
-  let countdownTimer  = null;
-  let ringAnimFrame   = null;
-  let pressStart      = 0;
-  let countdownValue  = 20;
-  const PRESS_MS      = 1500;
+  let longPressTimer       = null;
+  let countdownTimer       = null;
+  let ringAnimFrame        = null;
+  let pressStart           = 0;
+  let countdownValue       = 20;
+  let hasCreatedHighlight  = false;
+  const PRESS_MS           = 1500;
 
   // ── Screens ──────────────────────────────
   function showScreen(id) {
@@ -1120,6 +1188,12 @@
 
   // ── Save → snackbar → S1 ─────────────────
   function saveHighlight() {
+    if (!hasCreatedHighlight) {
+      hasCreatedHighlight = true;
+      document.body.classList.add('has-highlight');
+      document.getElementById('highlightsList').style.display = '';
+      document.getElementById('highlightsEmpty').style.display = 'none';
+    }
     showScreen('s1');
     showSnackbar();
   }
