@@ -464,22 +464,21 @@
     flex-shrink: 0;
   }
   .transcript-label { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 10px; }
-  .transcript-body { font-size: 14px; line-height: 1.55; color: #fff; }
-  .transcript-highlight {
-    background: linear-gradient(to right, rgba(245,197,24,0.65) 0%, rgba(245,197,24,0.65) 100%);
-    background-size: 0% 100%;
-    background-repeat: no-repeat;
-    background-position: left center;
-    border-radius: 3px;
-    padding: 1px 2px;
-    transition: none;
+  .transcript-body {
+    font-size: 14px; line-height: 1.55; color: #fff;
+    overflow: hidden;
+    height: calc(2 * 1.55 * 14px); /* show 2 lines */
+    position: relative;
   }
-  .transcript-highlight.sweep {
-    animation: marker-sweep 3.6s ease-out 0.3s forwards;
+  /* The scroll keyframe is generated dynamically in JS and injected as a <style> tag */
+  .transcript-scroll-inner {
+    animation-name: none;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    animation-play-state: paused;
   }
-  @keyframes marker-sweep {
-    0%   { background-size: 0%   100%; }
-    100% { background-size: 100% 100%; }
+  .transcript-scroll-inner.scrolling {
+    animation-play-state: running;
   }
   .transcript-link {
     display: block;
@@ -929,7 +928,7 @@
     <div class="transcript-card">
       <div class="transcript-label">Transcript preview</div>
       <div class="transcript-body">
-        <span class="transcript-highlight">The best product ideas come from your own daily frustrations — not from research docs</span>
+        <div class="transcript-scroll-inner" id="transcriptScroll">The best product ideas come from your own daily frustrations — not from research docs. The fastest way to validate an idea is to build it yourself. I used Claude Code together with Figma MCP, which allowed me to pull Spotify Mobile&#8217;s real UI directly into my workspace &#8212; and created a working prototype that feels just like the original app.</div>
       </div>
       <a class="transcript-link" href="#" onclick="return false;">Show full transcript</a>
     </div>
@@ -1280,12 +1279,51 @@
       }
     }, 1000);
 
-    // Trigger marker sweep on transcript highlight
-    const hl = document.querySelector('.transcript-highlight');
-    hl.classList.remove('sweep');
-    // Force reflow so animation restarts cleanly
-    void hl.offsetWidth;
-    hl.classList.add('sweep');
+    // Start transcript scroll — finishes exactly at 20s
+    startTranscriptScroll();
+  }
+
+  function startTranscriptScroll() {
+    const inner = document.getElementById('transcriptScroll');
+    if (!inner) return;
+    // Reset first
+    inner.classList.remove('scrolling');
+    inner.style.animationName = 'none';
+    inner.style.animationDuration = '';
+    void inner.offsetWidth;
+
+    const dist = inner.scrollHeight - inner.parentElement.clientHeight;
+    if (dist <= 0) return;
+
+    // Inject / update the keyframe rule
+    let styleTag = document.getElementById('transcriptKeyframe');
+    if (!styleTag) {
+      styleTag = document.createElement('style');
+      styleTag.id = 'transcriptKeyframe';
+      document.head.appendChild(styleTag);
+    }
+    styleTag.textContent =
+      `@keyframes transcript-scroll { from { transform: translateY(0); } to { transform: translateY(-${dist}px); } }`;
+
+    inner.style.animationName = 'transcript-scroll';
+    inner.style.animationDuration = '20s';
+    void inner.offsetWidth;
+    inner.classList.add('scrolling');
+  }
+
+  function stopTranscriptScroll() {
+    const inner = document.getElementById('transcriptScroll');
+    if (!inner) return;
+    inner.classList.remove('scrolling');
+    inner.style.animationName = 'none';
+    inner.style.animationDuration = '';
+  }
+
+  function resetTranscriptScroll() {
+    stopTranscriptScroll();
+    const inner = document.getElementById('transcriptScroll');
+    if (!inner) return;
+    inner.style.transform = '';
   }
 
   function renderCountdown() {
@@ -1296,6 +1334,7 @@
 
   function stopHighlight() {
     clearInterval(countdownTimer);
+    stopTranscriptScroll();
     saveHighlight();
   }
 
