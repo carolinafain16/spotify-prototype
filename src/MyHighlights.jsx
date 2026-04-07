@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import QuoteCardScreen from './QuoteCardScreen'
+
 const imgAlbumArt = "/cover.png";
 
 const HIGHLIGHTS = [
@@ -73,7 +76,7 @@ function IconBookmark() {
   )
 }
 
-function HighlightCard({ item }) {
+function HighlightCard({ item, onPlay }) {
   return (
     <div className="bg-[#181818] rounded-2xl p-4 mb-3">
       {/* Header row */}
@@ -109,7 +112,10 @@ function HighlightCard({ item }) {
         {/* Play + Share grouped */}
         <div className="flex items-center gap-2">
           {/* Play clip — slightly reduced */}
-          <button className="flex items-center gap-1.5 bg-[#1DB954]/10 rounded-full px-3 py-1.5">
+          <button
+            className="flex items-center gap-1.5 bg-[#1DB954]/10 rounded-full px-3 py-1.5"
+            onPointerDown={onPlay}
+          >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="#1DB954">
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
@@ -142,10 +148,11 @@ function groupByDate(items) {
 }
 
 export default function MyHighlights({ onBack }) {
+  const [quoteVisible, setQuoteVisible] = useState(false)
   const groups = groupByDate(HIGHLIGHTS)
 
   return (
-    <div className="bg-[#121212] w-full h-full flex flex-col overflow-hidden">
+    <div className="bg-[#121212] w-full h-full flex flex-col overflow-hidden relative">
       {/* Header */}
       <div className="flex-shrink-0 pt-[54px] px-5 pb-4">
         <div className="flex items-center gap-3 mb-6">
@@ -186,11 +193,21 @@ export default function MyHighlights({ onBack }) {
               {date}
             </p>
             {items.map(item => (
-              <HighlightCard key={item.id} item={item} />
+              <HighlightCard
+                key={item.id}
+                item={item}
+                onPlay={item.id === HIGHLIGHTS[0].id ? () => setQuoteVisible(true) : undefined}
+              />
             ))}
           </div>
         ))}
       </div>
+
+      {/* Quote card overlay — slides up from bottom */}
+      <QuoteCardScreen
+        visible={quoteVisible}
+        onClose={() => setQuoteVisible(false)}
+      />
     </div>
   )
 }

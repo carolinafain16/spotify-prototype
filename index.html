@@ -81,15 +81,28 @@
   .top-bar-title { font-size: 13px; font-weight: 700; color: #fff; text-align: center; flex: 1; }
   .top-bar-chevron svg { width: 18px; height: 18px; display: block; }
 
+  @keyframes hint-pulse {
+    0%, 100% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 0px rgba(251,234,139,0));
+    }
+    50% {
+      transform: scale(1.04);
+      filter: drop-shadow(0 0 5px rgba(251,234,139,0.55));
+    }
+  }
+
   /* Hint */
   .hint-text {
     text-align: center;
-    font-size: 11px;
+    font-size: 13px;
     color: #fbea8b;
     margin-bottom: 8px;
     flex-shrink: 0;
     padding: 0 24px;
     letter-spacing: 0.2px;
+    transform-origin: center;
+    animation: hint-pulse 1.5s ease-in-out infinite;
   }
 
   /* Cover wrap — defined below with border logic */
@@ -168,6 +181,11 @@
     user-select: none;
     touch-action: none;
     border-radius: 13px;
+    transition: transform 0.2s ease, filter 0.2s ease;
+  }
+  .cover-wrap:hover {
+    transform: scale(0.97);
+    filter: brightness(0.9);
   }
 
   /* SVG border path overlay — animated during long-press */
@@ -232,6 +250,19 @@
     border-radius: 2px;
     position: relative;
   }
+  .highlight-segment {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: calc(35.5% - 15px);
+    width: 30px;
+    height: 4.8px;
+    background: #fbea8b;
+    border-radius: 2px;
+    display: none;
+    z-index: 2;
+  }
+  .has-highlight .highlight-segment { display: block; }
   .seek-fill::after {
     content: '';
     position: absolute;
@@ -243,12 +274,15 @@
     background: #fff;
     border-radius: 50%;
     box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    display: none;
   }
-  /* Highlight marker on timeline */
+  .has-highlight .seek-fill::after { display: block; }
+  /* Highlight marker on timeline — hidden until first highlight is saved */
   .highlight-marker {
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
+    visibility: hidden;
     width: 3px;
     height: 12px;
     background: #fbea8b;
@@ -256,6 +290,31 @@
     pointer-events: none;
     z-index: 3;
     box-shadow: 0 0 5px rgba(251,234,139,0.9);
+  }
+  .has-highlight .highlight-marker { visibility: visible; }
+  /* Empty state for My Highlights */
+  .highlights-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 32px;
+    flex: 1;
+  }
+  .highlights-empty-icon { opacity: 0.25; }
+  .highlights-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    opacity: 0.5;
+    text-align: center;
+  }
+  .highlights-empty-sub {
+    font-size: 13px;
+    color: var(--secondary);
+    text-align: center;
+    line-height: 1.5;
   }
   .seek-times {
     display: flex;
@@ -548,15 +607,30 @@
     display: flex; gap: 5px; align-items: center;
   }
 
+  .card-actions {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+
   .card-play {
-    width: 36px; height: 36px;
+    width: 32px; height: 32px;
     border-radius: 50%;
-    background: var(--green);
+    background: #ffffff;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; cursor: pointer; border: none;
     transition: transform 0.15s, background 0.15s;
   }
-  .card-play:active { transform: scale(0.9); background: #18a349; }
+  .card-play:active { transform: scale(0.9); background: #e0e0e0; }
+
+  .card-share {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+  }
+  .card-share:active { transform: scale(0.9); opacity: 0.7; }
 
   .card-divider { height: 1px; background: #282828; margin: 0 16px; }
 
@@ -579,6 +653,11 @@
   .nav-item:active { opacity: 0.7; }
   .nav-label { font-size: 10px; color: var(--secondary); }
   .nav-item.active .nav-label { color: #fff; }
+  .nav-badge {
+    font-size: 9px; font-weight: 700; color: #fff;
+    background: #1DB954; border-radius: 6px;
+    padding: 1px 5px; letter-spacing: 0.3px; line-height: 1.4;
+  }
   .nav-home-ind {
     display: flex; justify-content: center;
     padding: 5px 0; flex-shrink: 0;
@@ -610,6 +689,76 @@
   .snackbar-icon { width: 44px; height: 44px; background: var(--green); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .snackbar-text { font-size: 14px; color: #121212; font-weight: 500; flex: 1; }
   .snackbar-view { font-size: 14px; font-weight: 700; color: var(--green); background: none; border: none; cursor: pointer; padding: 4px 0; flex-shrink: 0; }
+
+  /* ════════ QUOTE CARD OVERLAY ════════ */
+  /* ════════ QUOTE CARD OVERLAY ════════ */
+  .quote-overlay {
+    position: absolute; inset: 0; z-index: 100;
+    background: #121212;
+    display: none; flex-direction: column;
+    pointer-events: none;
+  }
+  .quote-overlay.open { display: flex; pointer-events: auto; }
+
+  .qo-topbar {
+    display: flex; align-items: center;
+    padding: 54px 20px 16px;
+    flex-shrink: 0;
+  }
+  .qo-close {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .qo-title {
+    flex: 1; text-align: center;
+    font-size: 16px; font-weight: 600; color: #fff;
+  }
+  .qo-spacer { width: 36px; flex-shrink: 0; }
+
+  .qo-body {
+    flex: 1; overflow-y: auto;
+    padding: 0 20px 16px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .qo-card {
+    background: #1f1f1f; border-radius: 16px; padding: 24px;
+  }
+  .qo-episode-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  }
+  .qo-thumb {
+    width: 44px; height: 44px; border-radius: 6px; object-fit: cover; flex-shrink: 0;
+  }
+  .qo-ep-info { flex: 1; min-width: 0; }
+  .qo-ep-show { font-size: 12px; color: #b3b3b3; line-height: 1.3; }
+  .qo-ep-title { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.4; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qo-play-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #fff; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; padding-left: 2px;
+  }
+  .qo-divider { height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 16px; }
+  .qo-quote-mark {
+    font-size: 40px; font-weight: 700; line-height: 1;
+    color: #1DB954; font-family: Georgia, serif; margin-bottom: 8px;
+  }
+  .qo-quote-text {
+    font-size: 16px; line-height: 26px; font-style: italic;
+    color: #f0f0f0; margin-bottom: 16px;
+  }
+  .qo-timestamp { font-size: 12px; color: #b3b3b3; }
+
+  .qo-footer { flex-shrink: 0; padding: 0 20px 32px; }
+  .qo-share-btn {
+    width: 100%; height: 52px; border-radius: 999px;
+    background: #fff; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 15px; font-weight: 700; color: #000;
+  }
 </style>
 </head>
 <body>
@@ -679,7 +828,7 @@
     </div>
 
     <div class="progress-section">
-      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-marker" style="left:35.5%;"></div></div>
+      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-segment"></div></div>
       <div class="seek-times"><span>14:22</span><span>-23:41</span></div>
     </div>
 
@@ -702,17 +851,28 @@
     </div>
 
     <div class="bottom-icons">
-      <div onclick="goToHighlights()" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:0.85;transition:opacity 0.15s;" onmousedown="this.style.opacity='0.5'" onmouseup="this.style.opacity='0.85'" onmouseleave="this.style.opacity='0.85'">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.85)"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z"/></svg>
-        <span style="font-size:9px;color:rgba(255,255,255,0.7);font-weight:600;letter-spacing:0.3px;">Highlights</span>
-      </div>
       <div class="bottom-icons-right">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7zM5 5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5h-2v5H5V7h5V5H5z"/></svg>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M3 5h16v2H3zm2 4h12v2H5zm0 4h12v2H5zm0 4h12v2H5z"/></svg>
       </div>
     </div>
 
-    <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+    <div class="bottom-nav" style="margin-top:auto">
+      <div class="nav-item active" onclick="goToPlayer()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5a6.5 6.5 0 10-6.5 6.5 6.47 6.47 0 004.23-1.57l.27.28v.79l5 5 1.49-1.49-4.99-5.01zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span class="nav-label">Search</span>
+      </div>
+      <div class="nav-item" onclick="goToHighlights()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="var(--secondary)"/></svg>
+        <span class="nav-label">My Highlights</span>
+        <div class="nav-badge">NEW</div>
+      </div>
+    </div>
+    <div class="nav-home-ind"><div class="nav-home-bar"></div></div>
 
     <!-- Snackbar -->
     <div class="snackbar" id="snackbar">
@@ -780,7 +940,7 @@
     </div>
 
     <div class="progress-section">
-      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-marker" style="left:35.5%;"></div></div>
+      <div class="seek-track"><div class="seek-fill"></div><div class="highlight-segment"></div></div>
       <div class="seek-times"><span>14:22</span><span>-23:41</span></div>
     </div>
 
@@ -802,7 +962,22 @@
       </button>
     </div>
 
-    <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+    <div class="bottom-nav" style="margin-top:auto">
+      <div class="nav-item active" onclick="goToPlayer()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5a6.5 6.5 0 10-6.5 6.5 6.47 6.47 0 004.23-1.57l.27.28v.79l5 5 1.49-1.49-4.99-5.01zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span class="nav-label">Search</span>
+      </div>
+      <div class="nav-item" onclick="goToHighlights()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="var(--secondary)"/></svg>
+        <span class="nav-label">My Highlights</span>
+        <div class="nav-badge">NEW</div>
+      </div>
+    </div>
+    <div class="nav-home-ind"><div class="nav-home-bar"></div></div>
   </div>
 
 
@@ -833,6 +1008,18 @@
 
     <div class="highlights-scroll">
 
+      <!-- Empty state — visible until first highlight is created -->
+      <div id="highlightsEmpty" class="highlights-empty">
+        <div class="highlights-empty-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="white"/></svg>
+        </div>
+        <div class="highlights-empty-title">No highlights yet</div>
+        <div class="highlights-empty-sub">Long-press the cover on the player screen to capture a moment</div>
+      </div>
+
+      <!-- Card list — hidden until first highlight is created -->
+      <div id="highlightsList" style="display:none">
+
       <!-- Group: Today -->
       <div class="section-header">
         <div class="section-header-title">Today</div>
@@ -850,9 +1037,14 @@
           <div class="card-quote">"...the best features come from personal frustration..."</div>
           <div class="card-meta"><span>14:22</span><span>·</span><span>28s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('What I Discovered While Driving')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); showQuoteCard()">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
@@ -868,9 +1060,14 @@
           <div class="card-quote">"...the best PMs fall in love with the problem, not the solution..."</div>
           <div class="card-meta"><span>22:08</span><span>·</span><span>18s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('How to Find Product-Market Fit')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('How to Find Product-Market Fit')">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
@@ -892,9 +1089,14 @@
           <div class="card-quote">"...we almost shipped a feature nobody asked for..."</div>
           <div class="card-meta"><span>1:04:33</span><span>·</span><span>22s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('The PM\'s Role in Discovery')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('The PM\'s Role in Discovery')">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
@@ -910,13 +1112,20 @@
           <div class="card-quote">"...keep asking why until you hit the root cause..."</div>
           <div class="card-meta"><span>2:15:47</span><span>·</span><span>31s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('5 Whys Method')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('5 Whys Method')">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
       <div style="height:20px"></div>
+
+      </div><!-- /#highlightsList -->
     </div>
 
     <div class="bottom-nav">
@@ -928,24 +1137,73 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5a6.5 6.5 0 10-6.5 6.5 6.47 6.47 0 004.23-1.57l.27.28v.79l5 5 1.49-1.49-4.99-5.01zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <span class="nav-label">Search</span>
       </div>
-      <div class="nav-item active">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
-        <span class="nav-label">Your Library</span>
+      <div class="nav-item active" onclick="goToHighlights()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="white"/></svg>
+        <span class="nav-label">My Highlights</span>
+        <div class="nav-badge">NEW</div>
       </div>
     </div>
     <div class="nav-home-ind"><div class="nav-home-bar"></div></div>
+  </div>
+
+  <!-- ══════════════════════
+       QUOTE CARD OVERLAY
+  ══════════════════════ -->
+  <div class="quote-overlay" id="quoteOverlay">
+    <!-- Top bar -->
+    <div class="qo-topbar">
+      <button class="qo-close" onclick="hideQuoteCard()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="qo-title">Highlight</div>
+      <div class="qo-spacer"></div>
+    </div>
+
+    <!-- Card -->
+    <div class="qo-body">
+      <div class="qo-card">
+        <div class="qo-episode-row">
+          <img class="qo-thumb"
+            src="https://www.figma.com/api/mcp/asset/c88f5d13-a98d-48f3-8493-ed08491ee452"
+            alt="Product Builder"
+            onerror="this.style.background='#F97316';this.style.borderRadius='6px'">
+          <div class="qo-ep-info">
+            <div class="qo-ep-show">Product Builder</div>
+            <div class="qo-ep-title">What I Discovered While Driving</div>
+          </div>
+          <button class="qo-play-btn">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
+
+        <div class="qo-divider"></div>
+
+        <div class="qo-quote-mark">&ldquo;</div>
+        <p class="qo-quote-text">I used Claude Code together with Figma MCP, which allowed me to pull Spotify Mobile&#8217;s real UI directly into my workspace &#8212; and created a working prototype that feels just like the original app.</p>
+        <div class="qo-timestamp">14:22 &middot; Highlight moment</div>
+      </div>
+    </div>
+
+    <!-- Share button -->
+    <div class="qo-footer">
+      <button class="qo-share-btn" onclick="shareHighlight()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="black"/></svg>
+        Share Highlight
+      </button>
+    </div>
   </div>
 
 </div><!-- /phone -->
 
 <script>
   // ── State ────────────────────────────────
-  let longPressTimer  = null;
-  let countdownTimer  = null;
-  let ringAnimFrame   = null;
-  let pressStart      = 0;
-  let countdownValue  = 20;
-  const PRESS_MS      = 1500;
+  let longPressTimer       = null;
+  let countdownTimer       = null;
+  let ringAnimFrame        = null;
+  let pressStart           = 0;
+  let countdownValue       = 20;
+  let hasCreatedHighlight  = false;
+  const PRESS_MS           = 1500;
 
   // ── Screens ──────────────────────────────
   function showScreen(id) {
@@ -1043,6 +1301,12 @@
 
   // ── Save → snackbar → S1 ─────────────────
   function saveHighlight() {
+    if (!hasCreatedHighlight) {
+      hasCreatedHighlight = true;
+      document.body.classList.add('has-highlight');
+      document.getElementById('highlightsList').style.display = '';
+      document.getElementById('highlightsEmpty').style.display = 'none';
+    }
     showScreen('s1');
     showSnackbar();
   }
@@ -1069,6 +1333,21 @@
       document.getElementById('episodeTitle').textContent = title;
     }
     showScreen('s1');
+  }
+  function showQuoteCard() {
+    const el = document.getElementById('quoteOverlay');
+    el.classList.add('open');
+  }
+  function hideQuoteCard() {
+    const el = document.getElementById('quoteOverlay');
+    el.classList.remove('open');
+  }
+  function shareHighlight() {
+    const text =
+      '\u201cI used Claude Code together with Figma MCP, which allowed me to pull Spotify Mobile\u2019s real UI directly into my workspace \u2014 and created a working prototype that feels just like the original app.\u201d\n\n' +
+      'Enjoyed this? Show some love with a \u2018like\u2019 on LinkedIn: [Link]\n' +
+      'Want to dive deeper? Feel free to DM me! :)';
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   }
 </script>
 </body>
