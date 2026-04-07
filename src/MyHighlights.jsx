@@ -50,11 +50,10 @@ function IconBack() {
     </svg>
   )
 }
-function IconShare() {
+function IconShareUpload({ color = '#1DB954' }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b3b3b3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fillRule="evenodd" clipRule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill={color}/>
     </svg>
   )
 }
@@ -107,24 +106,26 @@ function HighlightCard({ item }) {
 
       {/* Actions */}
       <div className="flex items-center justify-between">
-        {/* Play clip */}
-        <button className="flex items-center gap-2 bg-[#1DB954]/10 rounded-full px-4 py-2">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
-          <span className="text-[#1DB954] text-[13px] font-semibold">Play clip</span>
-        </button>
-
-        <div className="flex items-center gap-1">
-          {/* Share */}
-          <button className="w-[44px] h-[44px] flex items-center justify-center rounded-full">
-            <IconShare />
+        {/* Play + Share grouped */}
+        <div className="flex items-center gap-2">
+          {/* Play clip — slightly reduced */}
+          <button className="flex items-center gap-1.5 bg-[#1DB954]/10 rounded-full px-3 py-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#1DB954">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span className="text-[#1DB954] text-[12px] font-semibold">Play clip</span>
           </button>
-          {/* Delete */}
-          <button className="w-[44px] h-[44px] flex items-center justify-center rounded-full">
-            <IconDelete />
+          {/* Share — same height as Play, green outline style */}
+          <button className="flex items-center justify-center rounded-full border border-[#1DB954]/40 bg-[#1DB954]/5"
+            style={{ width: 32, height: 32 }}>
+            <IconShareUpload color="#1DB954" />
           </button>
         </div>
+
+        {/* Delete */}
+        <button className="w-[44px] h-[44px] flex items-center justify-center rounded-full">
+          <IconDelete />
+        </button>
       </div>
     </div>
   )

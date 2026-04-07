@@ -81,6 +81,11 @@
   .top-bar-title { font-size: 13px; font-weight: 700; color: #fff; text-align: center; flex: 1; }
   .top-bar-chevron svg { width: 18px; height: 18px; display: block; }
 
+  @keyframes green-pulse {
+    0%, 100% { filter: drop-shadow(0 0 0px rgba(29,185,84,0)); }
+    50%       { filter: drop-shadow(0 0 7px rgba(29,185,84,0.75)); }
+  }
+
   /* Hint */
   .hint-text {
     text-align: center;
@@ -90,6 +95,7 @@
     flex-shrink: 0;
     padding: 0 24px;
     letter-spacing: 0.2px;
+    animation: green-pulse 1.5s ease-in-out infinite;
   }
 
   /* Cover wrap — defined below with border logic */
@@ -552,15 +558,30 @@
     display: flex; gap: 5px; align-items: center;
   }
 
+  .card-actions {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+
   .card-play {
-    width: 36px; height: 36px;
+    width: 32px; height: 32px;
     border-radius: 50%;
-    background: var(--green);
+    background: #ffffff;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; cursor: pointer; border: none;
     transition: transform 0.15s, background 0.15s;
   }
-  .card-play:active { transform: scale(0.9); background: #18a349; }
+  .card-play:active { transform: scale(0.9); background: #e0e0e0; }
+
+  .card-share {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+  }
+  .card-share:active { transform: scale(0.9); opacity: 0.7; }
 
   .card-divider { height: 1px; background: #282828; margin: 0 16px; }
 
@@ -583,6 +604,11 @@
   .nav-item:active { opacity: 0.7; }
   .nav-label { font-size: 10px; color: var(--secondary); }
   .nav-item.active .nav-label { color: #fff; }
+  .nav-badge {
+    font-size: 9px; font-weight: 700; color: #fff;
+    background: #1DB954; border-radius: 6px;
+    padding: 1px 5px; letter-spacing: 0.3px; line-height: 1.4;
+  }
   .nav-home-ind {
     display: flex; justify-content: center;
     padding: 5px 0; flex-shrink: 0;
@@ -706,17 +732,28 @@
     </div>
 
     <div class="bottom-icons">
-      <div onclick="goToHighlights()" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:0.85;transition:opacity 0.15s;" onmousedown="this.style.opacity='0.5'" onmouseup="this.style.opacity='0.85'" onmouseleave="this.style.opacity='0.85'">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.85)"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z"/></svg>
-        <span style="font-size:9px;color:rgba(255,255,255,0.7);font-weight:600;letter-spacing:0.3px;">Highlights</span>
-      </div>
       <div class="bottom-icons-right">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7zM5 5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5h-2v5H5V7h5V5H5z"/></svg>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M3 5h16v2H3zm2 4h12v2H5zm0 4h12v2H5zm0 4h12v2H5z"/></svg>
       </div>
     </div>
 
-    <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+    <div class="bottom-nav" style="margin-top:auto">
+      <div class="nav-item active" onclick="goToPlayer()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5a6.5 6.5 0 10-6.5 6.5 6.47 6.47 0 004.23-1.57l.27.28v.79l5 5 1.49-1.49-4.99-5.01zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span class="nav-label">Search</span>
+      </div>
+      <div class="nav-item" onclick="goToHighlights()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="var(--secondary)"/></svg>
+        <span class="nav-label">My Highlights</span>
+        <div class="nav-badge">NEW</div>
+      </div>
+    </div>
+    <div class="nav-home-ind"><div class="nav-home-bar"></div></div>
 
     <!-- Snackbar -->
     <div class="snackbar" id="snackbar">
@@ -806,7 +843,22 @@
       </button>
     </div>
 
-    <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+    <div class="bottom-nav" style="margin-top:auto">
+      <div class="nav-item active" onclick="goToPlayer()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5a6.5 6.5 0 10-6.5 6.5 6.47 6.47 0 004.23-1.57l.27.28v.79l5 5 1.49-1.49-4.99-5.01zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span class="nav-label">Search</span>
+      </div>
+      <div class="nav-item" onclick="goToHighlights()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="var(--secondary)"/></svg>
+        <span class="nav-label">My Highlights</span>
+        <div class="nav-badge">NEW</div>
+      </div>
+    </div>
+    <div class="nav-home-ind"><div class="nav-home-bar"></div></div>
   </div>
 
 
@@ -854,9 +906,14 @@
           <div class="card-quote">"...the best features come from personal frustration..."</div>
           <div class="card-meta"><span>14:22</span><span>·</span><span>28s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('What I Discovered While Driving')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('What I Discovered While Driving')">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
@@ -872,9 +929,14 @@
           <div class="card-quote">"...the best PMs fall in love with the problem, not the solution..."</div>
           <div class="card-meta"><span>22:08</span><span>·</span><span>18s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('How to Find Product-Market Fit')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('How to Find Product-Market Fit')">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
@@ -896,9 +958,14 @@
           <div class="card-quote">"...we almost shipped a feature nobody asked for..."</div>
           <div class="card-meta"><span>1:04:33</span><span>·</span><span>22s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('The PM\'s Role in Discovery')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('The PM\'s Role in Discovery')">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
@@ -914,9 +981,14 @@
           <div class="card-quote">"...keep asking why until you hit the root cause..."</div>
           <div class="card-meta"><span>2:15:47</span><span>·</span><span>31s</span></div>
         </div>
-        <button class="card-play" onclick="event.stopPropagation(); goToPlayer('5 Whys Method')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
-        </button>
+        <div class="card-actions">
+          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
+          </button>
+          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('5 Whys Method')">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="card-divider"></div>
@@ -932,9 +1004,10 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5a6.5 6.5 0 10-6.5 6.5 6.47 6.47 0 004.23-1.57l.27.28v.79l5 5 1.49-1.49-4.99-5.01zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <span class="nav-label">Search</span>
       </div>
-      <div class="nav-item active">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
-        <span class="nav-label">Your Library</span>
+      <div class="nav-item active" onclick="goToHighlights()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="white"/></svg>
+        <span class="nav-label">My Highlights</span>
+        <div class="nav-badge">NEW</div>
       </div>
     </div>
     <div class="nav-home-ind"><div class="nav-home-bar"></div></div>

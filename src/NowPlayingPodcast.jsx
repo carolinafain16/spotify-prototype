@@ -428,7 +428,7 @@ export default function NowPlayingPodcast({ onHighlight }) {
 
       {/* Hint text — top, below header */}
       <p
-        className="absolute z-10 text-center pointer-events-none"
+        className="absolute z-10 text-center pointer-events-none halo-pulse"
         style={{
           top: '119px',
           left: '53px',
