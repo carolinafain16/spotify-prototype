@@ -480,6 +480,22 @@
   .transcript-scroll-inner.scrolling {
     animation-play-state: running;
   }
+  /* Yellow sweep across the full text, synced to 20s scroll */
+  .transcript-highlight {
+    background: linear-gradient(to right, rgba(245,197,24,0.65) 0%, rgba(245,197,24,0.65) 100%);
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    background-position: left center;
+    border-radius: 3px;
+    padding: 1px 2px;
+  }
+  @keyframes marker-sweep {
+    0%   { background-size: 0%   100%; }
+    100% { background-size: 100% 100%; }
+  }
+  .transcript-highlight.sweep {
+    animation: marker-sweep 20s linear forwards;
+  }
   .transcript-link {
     display: block;
     margin-top: 10px;
@@ -928,7 +944,7 @@
     <div class="transcript-card">
       <div class="transcript-label">Transcript preview</div>
       <div class="transcript-body">
-        <div class="transcript-scroll-inner" id="transcriptScroll">The best product ideas come from your own daily frustrations — not from research docs. The fastest way to validate an idea is to build it yourself. I used Claude Code together with Figma MCP, which allowed me to pull Spotify Mobile&#8217;s real UI directly into my workspace &#8212; and created a working prototype that feels just like the original app.</div>
+        <div class="transcript-scroll-inner" id="transcriptScroll"><span class="transcript-highlight" id="transcriptHighlight">The best product ideas come from your own daily frustrations — not from research docs. The fastest way to validate an idea is to build it yourself. I used Claude Code together with Figma MCP, which allowed me to pull Spotify Mobile&#8217;s real UI directly into my workspace &#8212; and created a working prototype that feels just like the original app.</span></div>
       </div>
       <a class="transcript-link" href="#" onclick="return false;">Show full transcript</a>
     </div>
@@ -1309,6 +1325,14 @@
     inner.style.animationDuration = '20s';
     void inner.offsetWidth;
     inner.classList.add('scrolling');
+
+    // Yellow highlight sweep — same 20s duration
+    const hl = document.getElementById('transcriptHighlight');
+    if (hl) {
+      hl.classList.remove('sweep');
+      void hl.offsetWidth;
+      hl.classList.add('sweep');
+    }
   }
 
   function stopTranscriptScroll() {
@@ -1317,6 +1341,8 @@
     inner.classList.remove('scrolling');
     inner.style.animationName = 'none';
     inner.style.animationDuration = '';
+    const hl = document.getElementById('transcriptHighlight');
+    if (hl) { hl.classList.remove('sweep'); }
   }
 
   function resetTranscriptScroll() {
