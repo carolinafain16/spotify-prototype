@@ -857,12 +857,6 @@
         <div class="cover-orange-bg"></div>
         <div class="cover-text">Product <em>Builder</em><small>WITH EYAL DAVID</small></div>
       </div>
-      <!-- Ripple rings — shown during recording, expand outward from cover edge -->
-      <div class="ripple-container" id="rippleContainer">
-        <div class="ripple-ring" style="width:280px;height:280px;left:50%;top:50%;"></div>
-        <div class="ripple-ring" style="width:280px;height:280px;left:50%;top:50%;"></div>
-        <div class="ripple-ring" style="width:280px;height:280px;left:50%;top:50%;"></div>
-      </div>
     </div>
 
     <div class="track-info">
@@ -954,7 +948,7 @@
     </div>
 
     <!-- Shrunk cover -->
-    <div class="cover-wrap-small">
+    <div class="cover-wrap-small" style="overflow:visible;">
       <img class="cover-img-small" id="coverImg2"
         src="/cover-eyal-david.jpg"
         alt="Cover"
@@ -962,6 +956,12 @@
       <div class="cover-fallback-small cover-fallback">
         <div class="cover-orange-bg"></div>
         <div class="cover-text" style="font-size:12px;">Product <em>Builder</em></div>
+      </div>
+      <!-- Ripple rings — expand outward from cover edge during recording -->
+      <div class="ripple-container" id="rippleContainer">
+        <div class="ripple-ring" style="width:222px;height:222px;left:50%;top:50%;"></div>
+        <div class="ripple-ring" style="width:222px;height:222px;left:50%;top:50%;"></div>
+        <div class="ripple-ring" style="width:222px;height:222px;left:50%;top:50%;"></div>
       </div>
     </div>
 
@@ -1262,8 +1262,6 @@
 
   function startLongPress(e) {
     e.preventDefault();
-    // If currently highlighting, a tap stops it
-    if (countdownTimer) { stopHighlight(); return; }
     pressStart = Date.now();
 
     const path = document.getElementById('borderPath');
@@ -1323,11 +1321,13 @@
     countdownValue = 20;
     renderCountdown();
     clearInterval(countdownTimer);
+    countdownTimer = null;
     countdownTimer = setInterval(() => {
       countdownValue--;
       renderCountdown();
       if (countdownValue <= 0) {
         clearInterval(countdownTimer);
+        countdownTimer = null;
         saveHighlight();
       }
     }, 1000);
@@ -1397,6 +1397,7 @@
 
   function stopHighlight() {
     clearInterval(countdownTimer);
+    countdownTimer = null;
     stopTranscriptScroll();
     // Restore hint, hide ripple
     const hint = document.getElementById('hintText');
