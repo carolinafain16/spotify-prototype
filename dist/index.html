@@ -919,7 +919,7 @@
     <!-- Snackbar -->
     <div class="snackbar" id="snackbar">
       <div class="snackbar-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
       </div>
       <span class="snackbar-text">Added to your Highlights.</span>
       <button class="snackbar-view" onclick="goToHighlights()">View</button>
@@ -1081,14 +1081,14 @@
         <div class="thumb-css thumb-pb-css" style="display:none"><div class="thumb-pb-dot"></div></div>
         <div class="card-info">
           <div class="card-episode">What I Discovered While Driving</div>
-          <div class="card-quote">"...the best features come from personal frustration..."</div>
+          <div class="card-quote">"The best product ideas come from your own daily frustrations..."</div>
           <div class="card-meta"><span>14:22</span><span>·</span><span>28s</span></div>
         </div>
         <div class="card-actions">
-          <button class="card-share" onclick="event.stopPropagation(); showQuoteCard()" aria-label="Share">
+          <button class="card-share" onclick="event.stopPropagation(); shareHighlightDirect('h1')" aria-label="Share">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
           </button>
-          <button class="card-play" onclick="event.stopPropagation(); showQuoteCard()">
+          <button class="card-play" onclick="event.stopPropagation(); showQuoteCard('h1')">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
           </button>
         </div>
@@ -1104,14 +1104,14 @@
         <div class="thumb-css thumb-lennys-css" style="display:none">🎙️</div>
         <div class="card-info">
           <div class="card-episode">How to Find Product-Market Fit</div>
-          <div class="card-quote">"...the best PMs fall in love with the problem, not the solution..."</div>
+          <div class="card-quote">"The best PMs fall in love with the problem, not the solution."</div>
           <div class="card-meta"><span>22:08</span><span>·</span><span>18s</span></div>
         </div>
         <div class="card-actions">
-          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+          <button class="card-share" onclick="event.stopPropagation(); shareHighlightDirect('h2')" aria-label="Share">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
           </button>
-          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('How to Find Product-Market Fit')">
+          <button class="card-play" onclick="event.stopPropagation(); showQuoteCard('h2')">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
           </button>
         </div>
@@ -1133,14 +1133,14 @@
         <div class="thumb-css thumb-tpp-css" style="display:none"><div class="thumb-tpp-ring">P</div></div>
         <div class="card-info">
           <div class="card-episode">The PM's Role in Discovery</div>
-          <div class="card-quote">"...we almost shipped a feature nobody asked for..."</div>
+          <div class="card-quote">"We almost shipped a feature no one asked for — until we talked to one customer."</div>
           <div class="card-meta"><span>1:04:33</span><span>·</span><span>22s</span></div>
         </div>
         <div class="card-actions">
-          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+          <button class="card-share" onclick="event.stopPropagation(); shareHighlightDirect('h3')" aria-label="Share">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
           </button>
-          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('The PM\'s Role in Discovery')">
+          <button class="card-play" onclick="event.stopPropagation(); showQuoteCard('h3')">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
           </button>
         </div>
@@ -1151,19 +1151,19 @@
       <div class="highlight-card" onclick="goToPlayer('5 Whys Method')">
         <img class="thumb-img"
           src="https://www.figma.com/api/mcp/asset/fd810c31-9afb-4d99-99a5-e7d3544746a5"
-          alt="Product Builder"
+          alt="Masters of Scale"
           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
         <div class="thumb-css thumb-pb-css" style="display:none"><div class="thumb-pb-dot"></div></div>
         <div class="card-info">
           <div class="card-episode">5 Whys Method</div>
-          <div class="card-quote">"...keep asking why until you hit the root cause..."</div>
+          <div class="card-quote">"Keep asking why until you hit the assumption that's actually wrong."</div>
           <div class="card-meta"><span>2:15:47</span><span>·</span><span>31s</span></div>
         </div>
         <div class="card-actions">
-          <button class="card-share" onclick="event.stopPropagation()" aria-label="Share">
+          <button class="card-share" onclick="event.stopPropagation(); shareHighlightDirect('h4')" aria-label="Share">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.5303 2.88378L12.0001 2.35352L11.4697 2.88372L7.96973 6.38289C7.6768 6.67575 7.67675 7.15062 7.96961 7.44355C8.26247 7.73648 8.73734 7.73653 9.03027 7.44368L11.25 5.22447V12.4143C11.25 12.8285 11.5858 13.1643 12 13.1643C12.4142 13.1643 12.75 12.8285 12.75 12.4143V5.22477L14.9697 7.44444C15.2626 7.73734 15.7374 7.73734 16.0303 7.44444C16.3232 7.15155 16.3232 6.67668 16.0303 6.38378L12.5303 2.88378ZM4.5 8.24999C4.08579 8.24999 3.75 8.58578 3.75 8.99999V20.4145C3.75 20.8288 4.08579 21.1645 4.5 21.1645H19.5C19.9142 21.1645 20.25 20.8288 20.25 20.4145V8.99999C20.25 8.58578 19.9142 8.24999 19.5 8.24999H17V9.74999H18.75V19.6645H5.25V9.74999H7V8.24999H4.5Z" fill="#ffffff"/></svg>
           </button>
-          <button class="card-play" onclick="event.stopPropagation(); goToPlayer('5 Whys Method')">
+          <button class="card-play" onclick="event.stopPropagation(); showQuoteCard('h4')">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
           </button>
         </div>
@@ -1206,17 +1206,15 @@
       <div class="qo-spacer"></div>
     </div>
 
-    <!-- Card -->
+    <!-- Card — populated dynamically by showQuoteCard(id) -->
     <div class="qo-body">
       <div class="qo-card">
         <div class="qo-episode-row">
-          <img class="qo-thumb"
-            src="https://www.figma.com/api/mcp/asset/c88f5d13-a98d-48f3-8493-ed08491ee452"
-            alt="Product Builder"
+          <img class="qo-thumb" id="qoThumb" src="" alt=""
             onerror="this.style.background='#F97316';this.style.borderRadius='6px'">
           <div class="qo-ep-info">
-            <div class="qo-ep-show">Product Builder</div>
-            <div class="qo-ep-title">What I Discovered While Driving</div>
+            <div class="qo-ep-show" id="qoShow"></div>
+            <div class="qo-ep-title" id="qoEpisode"></div>
           </div>
           <button class="qo-play-btn">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="#000"><path d="M3 2l11 7L3 16V2z"/></svg>
@@ -1226,8 +1224,8 @@
         <div class="qo-divider"></div>
 
         <div class="qo-quote-mark">&ldquo;</div>
-        <p class="qo-quote-text">I used Claude Code together with Figma MCP, which allowed me to pull Spotify Mobile&#8217;s real UI directly into my workspace &#8212; and created a working prototype that feels just like the original app.</p>
-        <div class="qo-timestamp">14:22 &middot; Highlight moment</div>
+        <p class="qo-quote-text" id="qoQuote"></p>
+        <div class="qo-timestamp" id="qoTimestamp"></div>
       </div>
 
       <!-- Share button directly below card -->
@@ -1447,20 +1445,64 @@
     }
     showScreen('s1');
   }
-  function showQuoteCard() {
-    const el = document.getElementById('quoteOverlay');
-    el.classList.add('open');
+  // ── Highlight data ────────────────────────
+  const HIGHLIGHTS = {
+    h1: {
+      show: 'Product Builder',
+      episode: 'What I Discovered While Driving',
+      quote: 'The best product ideas come from your own daily frustrations \u2014 not from research docs. The fastest way to validate an idea is to build it yourself.',
+      timestamp: '14:22',
+      thumb: 'https://www.figma.com/api/mcp/asset/fd810c31-9afb-4d99-99a5-e7d3544746a5',
+    },
+    h2: {
+      show: "Lenny\u2019s Podcast",
+      episode: 'How to Find Product-Market Fit',
+      quote: 'The best PMs fall in love with the problem, not the solution.',
+      timestamp: '22:08',
+      thumb: 'https://www.figma.com/api/mcp/asset/69520fa9-fe8b-437b-8af2-49de64217d9a',
+    },
+    h3: {
+      show: 'The Product Podcast',
+      episode: "The PM\u2019s Role in Discovery",
+      quote: 'We almost shipped a feature no one asked for \u2014 until we talked to one customer.',
+      timestamp: '1:04:33',
+      thumb: 'https://www.figma.com/api/mcp/asset/8b7918f3-09da-4e94-978b-1e1e8c6991a7',
+    },
+    h4: {
+      show: 'Masters of Scale',
+      episode: '5 Whys Method',
+      quote: "Keep asking why until you hit the assumption that\u2019s actually wrong.",
+      timestamp: '2:15:47',
+      thumb: 'https://www.figma.com/api/mcp/asset/fd810c31-9afb-4d99-99a5-e7d3544746a5',
+    },
+  };
+  let currentHighlightId = 'h1';
+
+  function showQuoteCard(id) {
+    currentHighlightId = id || 'h1';
+    const h = HIGHLIGHTS[currentHighlightId];
+    document.getElementById('qoThumb').src = h.thumb;
+    document.getElementById('qoThumb').alt = h.show;
+    document.getElementById('qoShow').textContent = h.show;
+    document.getElementById('qoEpisode').textContent = h.episode;
+    document.getElementById('qoQuote').textContent = h.quote;
+    document.getElementById('qoTimestamp').textContent = h.timestamp + ' \u00b7 Highlight moment';
+    document.getElementById('quoteOverlay').classList.add('open');
   }
   function hideQuoteCard() {
-    const el = document.getElementById('quoteOverlay');
-    el.classList.remove('open');
+    document.getElementById('quoteOverlay').classList.remove('open');
   }
-  function shareHighlight() {
-    const text =
-      '\u201cI used Claude Code together with Figma MCP, which allowed me to pull Spotify Mobile\u2019s real UI directly into my workspace \u2014 and created a working prototype that feels just like the original app.\u201d\n\n' +
+  function _buildShareText(id) {
+    const h = HIGHLIGHTS[id || currentHighlightId];
+    return '\u201c' + h.quote + '\u201d\n\n' +
       'Enjoyed this? Show some love with a \u2018like\u2019 on LinkedIn: [Link]\n' +
       'Want to dive deeper? Feel free to DM me! :)';
-    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+  function shareHighlight() {
+    window.open('https://wa.me/?text=' + encodeURIComponent(_buildShareText(currentHighlightId)), '_blank');
+  }
+  function shareHighlightDirect(id) {
+    window.open('https://wa.me/?text=' + encodeURIComponent(_buildShareText(id)), '_blank');
   }
 
 
