@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Spotify — Podcast Highlight</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -797,6 +797,48 @@
     display: flex; align-items: center; justify-content: center; gap: 8px;
     font-size: 15px; font-weight: 700; color: #000;
   }
+
+  /* ════════ MOBILE — real device (≤480px) ════════ */
+  @media (max-width: 480px) {
+    body {
+      background: #121212;
+      align-items: flex-start;
+      padding: 0;
+    }
+    .phone {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100dvh !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      transform: none !important;
+      padding-top: env(safe-area-inset-top);
+    }
+    .screen {
+      width: 100% !important;
+      height: 100dvh !important;
+    }
+    /* Hide fake status bar — real phone has its own */
+    .status-bar { display: none !important; }
+    /* Hide fake home indicator — real phone has its own */
+    .nav-home-ind { display: none !important; }
+    /* Pin bottom nav to real bottom */
+    .bottom-nav {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom);
+      height: calc(72px + env(safe-area-inset-bottom)) !important;
+    }
+    /* Prevent content from hiding behind fixed nav */
+    #s1, #s2 { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+    .highlights-scroll { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+    /* Quote overlay fills full screen */
+    .quote-overlay { height: 100dvh !important; }
+  }
 </style>
 </head>
 <body>
@@ -1488,8 +1530,9 @@
     window.open('https://wa.me/?text=' + encodeURIComponent(_buildShareText(id)), '_blank');
   }
 
-  // ── Scale phone to fit viewport ───────────
+  // ── Scale phone to fit viewport (desktop only) ───────────
   function fitPhone() {
+    if (window.innerWidth <= 480) return; // CSS handles mobile
     var phone = document.querySelector('.phone');
     var scale = Math.min(1, (window.innerHeight - 8) / 844, window.innerWidth / 390);
     if (scale < 1) {
