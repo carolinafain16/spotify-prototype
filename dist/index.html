@@ -778,6 +778,38 @@
   }
   .qo-timestamp { font-size: 12px; color: #b3b3b3; }
 
+  /* ════════ NAV TOOLTIP ════════ */
+  .nav-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f1f1f;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 300;
+    cursor: pointer;
+  }
+  .nav-tooltip.visible { opacity: 1; pointer-events: auto; }
+  /* Downward arrow */
+  .nav-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 7px solid transparent;
+    border-top-color: #1f1f1f;
+  }
+
   /* ════════ RECORDING GLOW ════════ */
   @keyframes recording-pulse {
     0%, 100% { box-shadow: 0 0 12px 6px rgba(255,215,0,0.6), 0 0 0 2px rgba(255,215,0,0.8); }
@@ -941,6 +973,7 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.4999 1.15002C17.9699 1.15002 17.4599 1.34002 17.0699 1.73002L11.2599 7.55002L16.9099 13.2L22.7299 7.39002C23.4999 6.61002 23.4999 5.35002 22.7299 4.56002L19.8899 1.73002C19.4999 1.34002 18.9999 1.15002 18.4999 1.15002ZM10.2999 8.50002L4.33992 14.46C3.55992 15.24 3.55992 16.5 4.35992 17.31C3.13992 18.54 1.89992 19.77 0.669922 21H6.32992L7.18992 20.14C7.96992 20.9 9.21992 20.89 9.99992 20.12L15.9499 14.16" fill="var(--secondary)"/></svg>
         <span class="nav-label">My Highlights</span>
         <div class="nav-badge" id="navDot"></div>
+        <div class="nav-tooltip" id="navTooltip" onclick="event.stopPropagation(); goToHighlights()">Tap here to see it! ✨</div>
       </div>
     </div>
     <div class="nav-home-ind"><div class="nav-home-bar"></div></div>
@@ -1445,7 +1478,11 @@
 
   // ── Snackbar ──────────────────────────────
   let snackTimer = null;
+  let tooltipTimer = null;
+  let snackDismissedByUser = false;
+
   function showSnackbar() {
+    snackDismissedByUser = false;
     const sb = document.getElementById('snackbar');
     sb.classList.add('show');
     clearTimeout(snackTimer);
@@ -1453,10 +1490,30 @@
   }
   function hideSnackbar() {
     document.getElementById('snackbar').classList.remove('show');
+    if (!snackDismissedByUser) {
+      clearTimeout(tooltipTimer);
+      tooltipTimer = setTimeout(showNavTooltip, 1000);
+    }
+  }
+  function showNavTooltip() {
+    const t = document.getElementById('navTooltip');
+    if (t) t.classList.add('visible');
+    clearTimeout(tooltipTimer);
+    tooltipTimer = setTimeout(hideNavTooltip, 4000);
+  }
+  function hideNavTooltip() {
+    clearTimeout(tooltipTimer);
+    const t = document.getElementById('navTooltip');
+    if (t) t.classList.remove('visible');
   }
 
   // ── Navigation ────────────────────────────
   function goToHighlights() {
+    // If snackbar is visible, user chose to view — suppress tooltip
+    if (document.getElementById('snackbar').classList.contains('show')) {
+      snackDismissedByUser = true;
+    }
+    hideNavTooltip();
     hideSnackbar();
     showScreen('s4');
     // Dismiss dot on first visit
