@@ -769,29 +769,14 @@
   }
   .qo-timestamp { font-size: 12px; color: #b3b3b3; }
 
-  /* ════════ RIPPLE ANIMATION ════════ */
-  .ripple-container {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 5;
-    display: none;
-    overflow: visible;
+  /* ════════ RECORDING GLOW ════════ */
+  @keyframes recording-pulse {
+    0%, 100% { box-shadow: 0 0 12px 6px rgba(255,215,0,0.6), 0 0 0 2px rgba(255,215,0,0.8); }
+    50%       { box-shadow: 0 0 28px 14px rgba(255,215,0,0.2), 0 0 0 2px rgba(255,215,0,0.4); }
   }
-  .ripple-container.active { display: block; }
-  .ripple-ring {
-    position: absolute;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 215, 0, 0.55);
-    animation: ripple-expand 2s ease-out infinite;
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0;
-  }
-  .ripple-ring:nth-child(2) { animation-delay: 0.65s; }
-  .ripple-ring:nth-child(3) { animation-delay: 1.3s; }
-  @keyframes ripple-expand {
-    0%   { transform: translate(-50%, -50%) scale(1.0); opacity: 0.75; }
-    100% { transform: translate(-50%, -50%) scale(1.75); opacity: 0; }
+  .recording-glow {
+    animation: recording-pulse 1.5s ease-in-out infinite;
+    border-radius: 13px;
   }
 
   /* ════════ QUOTE CARD — tighter layout ════════ */
@@ -948,7 +933,7 @@
     </div>
 
     <!-- Shrunk cover -->
-    <div class="cover-wrap-small" style="overflow:visible;">
+    <div class="cover-wrap-small" id="coverWrapSmall">
       <img class="cover-img-small" id="coverImg2"
         src="/cover-eyal-david.jpg"
         alt="Cover"
@@ -956,12 +941,6 @@
       <div class="cover-fallback-small cover-fallback">
         <div class="cover-orange-bg"></div>
         <div class="cover-text" style="font-size:12px;">Product <em>Builder</em></div>
-      </div>
-      <!-- Ripple rings — expand outward from cover edge during recording -->
-      <div class="ripple-container" id="rippleContainer">
-        <div class="ripple-ring" style="width:222px;height:222px;left:50%;top:50%;"></div>
-        <div class="ripple-ring" style="width:222px;height:222px;left:50%;top:50%;"></div>
-        <div class="ripple-ring" style="width:222px;height:222px;left:50%;top:50%;"></div>
       </div>
     </div>
 
@@ -1311,11 +1290,11 @@
   // ── Highlighting (S2) ────────────────────
   function beginHighlighting() {
     showScreen('s2');
-    // Hide hint text, show ripple
+    // Hide hint text, start recording glow
     const hint = document.getElementById('hintText');
     if (hint) hint.style.visibility = 'hidden';
-    const ripple = document.getElementById('rippleContainer');
-    if (ripple) ripple.classList.add('active');
+    const cws = document.getElementById('coverWrapSmall');
+    if (cws) cws.classList.add('recording-glow');
     countdownValue = 20;
     renderCountdown();
     clearInterval(countdownTimer);
@@ -1397,19 +1376,19 @@
     clearInterval(countdownTimer);
     countdownTimer = null;
     stopTranscriptScroll();
-    // Restore hint, hide ripple
+    // Restore hint, stop recording glow
     const hint = document.getElementById('hintText');
     if (hint) hint.style.visibility = '';
-    const ripple = document.getElementById('rippleContainer');
-    if (ripple) ripple.classList.remove('active');
+    const cws = document.getElementById('coverWrapSmall');
+    if (cws) cws.classList.remove('recording-glow');
     saveHighlight();
   }
 
   // ── Save → snackbar → S1 ─────────────────
   function saveHighlight() {
-    // Stop ripple
-    const ripple = document.getElementById('rippleContainer');
-    if (ripple) ripple.classList.remove('active');
+    // Stop recording glow
+    const cws = document.getElementById('coverWrapSmall');
+    if (cws) cws.classList.remove('recording-glow');
     if (!hasCreatedHighlight) {
       hasCreatedHighlight = true;
       document.body.classList.add('has-highlight');
