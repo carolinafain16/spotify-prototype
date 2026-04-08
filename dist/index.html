@@ -979,7 +979,7 @@
     </div>
 
     <!-- Shrunk cover -->
-    <div class="cover-wrap-small" id="coverWrapSmall">
+    <div class="cover-wrap-small" id="coverWrapSmall" onclick="if(countdownTimer) stopHighlight()">
       <img class="cover-img-small" id="coverImg2"
         src="/cover-eyal-david.jpg"
         alt="Cover"
@@ -995,7 +995,7 @@
       <div class="highlighting-dot"></div>
       <span class="highlighting-label">HIGHLIGHTING...</span>
       <span class="countdown" id="countdown">0:20</span>
-      <button class="stop-btn" onclick="stopHighlight()">Stop</button>
+      <button class="stop-btn" onclick="stopHighlight()">TAP TO STOP</button>
     </div>
 
     <!-- Transcript card -->
@@ -1341,14 +1341,14 @@
     if (hint) hint.style.visibility = 'hidden';
     const cws = document.getElementById('coverWrapSmall');
     if (cws) cws.classList.add('recording-glow');
-    countdownValue = 20;
+    countdownValue = 0;
     renderCountdown();
     clearInterval(countdownTimer);
     countdownTimer = null;
     countdownTimer = setInterval(() => {
-      countdownValue--;
+      countdownValue++;
       renderCountdown();
-      if (countdownValue <= 0) {
+      if (countdownValue >= 20) {
         clearInterval(countdownTimer);
         countdownTimer = null;
         saveHighlight();
