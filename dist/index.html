@@ -23,9 +23,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 100dvh;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow: hidden;
   }
 
   /* Phone shell */
@@ -37,6 +38,8 @@
     border-radius: 44px;
     box-shadow: 0 0 0 1px #333, 0 40px 100px rgba(0,0,0,0.9);
     background: var(--bg-dark);
+    transform-origin: top center;
+    flex-shrink: 0;
   }
 
   /* SCREENS */
@@ -45,7 +48,8 @@
     inset: 0;
     width: 390px;
     height: 844px;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: none;
     flex-direction: column;
   }
@@ -877,13 +881,6 @@
       </button>
     </div>
 
-    <div class="bottom-icons">
-      <div class="bottom-icons-right">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7zM5 5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5h-2v5H5V7h5V5H5z"/></svg>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><path d="M3 5h16v2H3zm2 4h12v2H5zm0 4h12v2H5zm0 4h12v2H5z"/></svg>
-      </div>
-    </div>
-
     <div class="bottom-nav" style="margin-top:auto">
       <div class="nav-item active" onclick="goToPlayer()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -1484,6 +1481,23 @@
     window.open('https://wa.me/?text=' + encodeURIComponent(_buildShareText(id)), '_blank');
   }
 
+  // ── Scale phone to fit viewport ───────────
+  function fitPhone() {
+    var phone = document.querySelector('.phone');
+    var scale = Math.min(1, (window.innerHeight - 8) / 844, window.innerWidth / 390);
+    if (scale < 1) {
+      phone.style.transform = 'scale(' + scale + ')';
+      phone.style.transformOrigin = 'top center';
+      document.body.style.alignItems = 'flex-start';
+      document.body.style.paddingTop = '0';
+    } else {
+      phone.style.transform = '';
+      document.body.style.alignItems = 'center';
+      document.body.style.paddingTop = '';
+    }
+  }
+  fitPhone();
+  window.addEventListener('resize', fitPhone);
 
 </script>
 </body>
