@@ -892,51 +892,79 @@
 
   .lib-pills {
     display: flex; gap: 8px; padding: 6px 16px 12px; flex-shrink: 0;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
   }
   .lib-pill {
-    font-size: 13px; font-weight: 600; padding: 6px 14px;
-    border-radius: 20px; border: none; cursor: default;
-    background: rgba(255,255,255,0.1); color: #fff;
+    font-size: 11px; font-weight: 600; padding: 7px 16px;
+    border-radius: 16px; border: none; cursor: default;
+    background: #313131; color: #fff; white-space: nowrap; flex-shrink: 0;
   }
-  .lib-pill.active { background: #fff; color: #000; }
+  .lib-pill.active { background: #1ed760; color: #fff; }
 
-  .lib-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-
-  .lib-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 8px 16px; cursor: default;
+  /* Grid layout */
+  .lib-grid {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 8px 16px 16px;
+    display: flex; flex-wrap: wrap; gap: 16px 17px;
+    align-content: flex-start;
   }
-  .lib-thumb {
-    width: 56px; height: 56px; border-radius: 6px;
-    object-fit: cover; flex-shrink: 0;
+  .lib-card {
+    display: flex; flex-direction: column; gap: 8px;
+    width: 108px; cursor: default; flex-shrink: 0;
   }
-  .lib-info { flex: 1; min-width: 0; }
-  .lib-name {
-    font-size: 15px; font-weight: 500; color: #fff;
+  .lib-card-img {
+    width: 108px; height: 108px; border-radius: 4px;
+    object-fit: cover; flex-shrink: 0; display: block;
+  }
+  .lib-card-img-wrap {
+    width: 108px; height: 108px; border-radius: 4px;
+    overflow: hidden; flex-shrink: 0; position: relative;
+  }
+  .lib-card-placeholder {
+    width: 108px; height: 108px; border-radius: 4px;
+    background: #056952; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .lib-card-name {
+    font-size: 11px; font-weight: 600; color: #fff;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    margin-bottom: 3px;
+    line-height: 16px;
   }
-  .lib-type { font-size: 13px; color: var(--secondary); }
+  .lib-card-sub {
+    font-size: 11px; font-weight: 600; color: var(--secondary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 16px; display: flex; align-items: center; gap: 4px;
+  }
+  .lib-card-pin { flex-shrink: 0; }
 
   .lib-miniplayer {
     display: flex; align-items: center; gap: 12px;
-    padding: 10px 14px;
-    background: #1f1f1f;
-    border-radius: 10px;
+    padding: 8px;
+    background: #645c45;
+    border-radius: 8px;
     margin: 0 8px 8px;
     flex-shrink: 0;
     cursor: default;
+    position: relative;
   }
   .lib-mini-thumb {
     width: 40px; height: 40px; border-radius: 4px; object-fit: cover; flex-shrink: 0;
   }
   .lib-mini-info { flex: 1; min-width: 0; }
   .lib-mini-title {
-    font-size: 13px; font-weight: 600; color: #fff;
+    font-size: 12px; font-weight: 600; color: #fff;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .lib-mini-sub { font-size: 11px; color: var(--secondary); margin-top: 1px; }
-  .lib-mini-controls { display: flex; gap: 16px; align-items: center; flex-shrink: 0; }
+  .lib-mini-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lib-mini-controls { display: flex; align-items: center; flex-shrink: 0; }
+  .lib-mini-seek {
+    position: absolute; bottom: 0; left: 2%; right: 2%;
+    height: 2px; background: rgba(255,255,255,0.3); border-radius: 1px; overflow: hidden;
+  }
+  .lib-mini-seek-bar {
+    height: 100%; width: 48%; background: #fff; border-radius: 1px;
+  }
 </style>
 </head>
 <body>
@@ -975,41 +1003,73 @@
 
     <!-- Filter pills -->
     <div class="lib-pills">
+      <button class="lib-pill">Playlists</button>
       <button class="lib-pill active">Podcasts</button>
       <button class="lib-pill">Albums</button>
       <button class="lib-pill">Artists</button>
     </div>
 
-    <!-- Podcast list -->
-    <div class="lib-list">
-      <div class="lib-row">
-        <img class="lib-thumb" src="/cover-eyal-david.jpg" alt="Product Builder">
-        <div class="lib-info">
-          <div class="lib-name">Product Builder with Eyal David</div>
-          <div class="lib-type">Podcast</div>
+    <!-- Podcast grid -->
+    <div class="lib-grid">
+
+      <!-- Your Episodes -->
+      <div class="lib-card">
+        <div class="lib-card-placeholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="white" opacity="0.9"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+        </div>
+        <div>
+          <div class="lib-card-name">Your Episodes</div>
+          <div class="lib-card-sub">
+            <svg class="lib-card-pin" width="12" height="12" viewBox="0 0 24 24" fill="#1ed760"><path d="M17 4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1h10V4zm2 2H5v1l2 4v5l5 2 5-2v-5l2-4V6z"/></svg>
+            Saved &amp; downloaded
+          </div>
         </div>
       </div>
-      <div class="lib-row">
-        <img class="lib-thumb" src="/cover-lennys.jpg" alt="Lenny's Podcast">
-        <div class="lib-info">
-          <div class="lib-name">Lenny's Podcast</div>
-          <div class="lib-type">Podcast</div>
+
+      <!-- Product Builder -->
+      <div class="lib-card">
+        <div class="lib-card-img-wrap">
+          <img class="lib-card-img" src="/cover-eyal-david.jpg" alt="Product Builder">
+        </div>
+        <div>
+          <div class="lib-card-name">Product Builder</div>
+          <div class="lib-card-sub">Eyal David</div>
         </div>
       </div>
-      <div class="lib-row">
-        <img class="lib-thumb" src="/cover-productivi.jpg" alt="פרודקטיבי">
-        <div class="lib-info">
-          <div class="lib-name">פרודקטיבי</div>
-          <div class="lib-type">פודקאסט</div>
+
+      <!-- פרודקטיבי -->
+      <div class="lib-card">
+        <div class="lib-card-img-wrap">
+          <img class="lib-card-img" src="/cover-productivi.jpg" alt="פרודקטיבי">
+        </div>
+        <div>
+          <div class="lib-card-name">פרודקטיבי</div>
+          <div class="lib-card-sub">Startup for Startup</div>
         </div>
       </div>
-      <div class="lib-row">
-        <img class="lib-thumb" src="/cover-guy.jpg" alt="גיא קצוביץ'">
-        <div class="lib-info">
-          <div class="lib-name">הפודקאסט של גיא קצוביץ'</div>
-          <div class="lib-type">פודקאסט</div>
+
+      <!-- הפודקאסט של גיא קצוביץ -->
+      <div class="lib-card">
+        <div class="lib-card-img-wrap">
+          <img class="lib-card-img" src="/cover-guy.jpg" alt="גיא קצוביץ">
+        </div>
+        <div>
+          <div class="lib-card-name">הפודקאסט של גיא קצוביץ</div>
+          <div class="lib-card-sub">גיא קצוביץ'</div>
         </div>
       </div>
+
+      <!-- Lenny's Podcast -->
+      <div class="lib-card">
+        <div class="lib-card-img-wrap">
+          <img class="lib-card-img" src="/cover-lennys.jpg" alt="Lenny's Podcast">
+        </div>
+        <div>
+          <div class="lib-card-name">Lenny's Podcast</div>
+          <div class="lib-card-sub">Lenny Rachitsky</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Mini player -->
@@ -1017,12 +1077,12 @@
       <img class="lib-mini-thumb" src="/cover-eyal-david.jpg" alt="Now playing">
       <div class="lib-mini-info">
         <div class="lib-mini-title">What I Discovered While Driving</div>
-        <div class="lib-mini-sub">Product Builder with Eyal David</div>
+        <div class="lib-mini-sub">Product Builder</div>
       </div>
       <div class="lib-mini-controls">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><rect x="5" y="3" width="4" height="18" rx="1.5"/><rect x="15" y="3" width="4" height="18" rx="1.5"/></svg>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
       </div>
+      <div class="lib-mini-seek"><div class="lib-mini-seek-bar"></div></div>
     </div>
 
     <!-- Bottom nav -->
@@ -1036,7 +1096,7 @@
         <span class="nav-label">Search</span>
       </div>
       <div class="nav-item active">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M4 4h4v4H4zm0 6h4v4H4zm0 6h4v4H4zm6-12h4v4h-4zm0 6h4v4h-4zm0 6h4v4h-4zm6-12h4v4h-4zm0 6h4v4h-4zm0 6h4v4h-4z" opacity="0"/><rect x="3" y="3" width="8" height="10" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="3" y="15" width="8" height="6" rx="1"/><rect x="13" y="10" width="8" height="11" rx="1"/></svg>
         <span class="nav-label" style="color:#fff">Your Library</span>
       </div>
     </div>
