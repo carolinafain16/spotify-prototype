@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import NowPlayingPodcast from './NowPlayingPodcast'
 import HighlightToast from './HighlightToast'
 import MyHighlights from './MyHighlights'
@@ -66,6 +67,7 @@ export default function App() {
           ? 'Long-press the HIGHLIGHT button to save a moment'
           : 'Back arrow returns to Now Playing'}
       </p>
+      <Analytics />
     </div>
   )
 }
